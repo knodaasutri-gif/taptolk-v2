@@ -45,21 +45,9 @@
                 </div>
             </div>
             <div class="time-select-row">
-                <label>⏰ 時間指定（必要な場合）</label>
-                <select id="leaveTimeInput">
-                    <option value="">指定なし</option>
-                    <option value="08:00">08:00</option>
-                    <option value="08:30">08:30</option>
-                    <option value="09:00">09:00</option>
-                    <option value="09:30">09:30</option>
-                    <option value="10:00">10:00</option>
-                    <option value="10:30">10:30</option>
-                    <option value="11:00">11:00</option>
-                    <option value="13:00">13:00</option>
-                    <option value="14:00">14:00</option>
-                    <option value="15:00">15:00</option>
-                </select>
-            </div>
+    <label for="leaveTimeInput">⏰ 時間指定（必要な場合）</label>
+    <input type="time" id="leaveTimeInput">
+</div>
             <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">タップしてカード作成＆送信:</p>
             <div class="quick-leave-grid">
                 <button class="leave-quick-btn" onclick="generateLeaveCard('終日お休みします', '📅', false)">📅 終日お休み</button>
