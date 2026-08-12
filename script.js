@@ -297,6 +297,10 @@ function toggleSpeechRecognition() {
         try {
             isListening = true;
             recognition.start();
+            // 自由入力欄をクリアする
+const customInput = document.getElementById("customTextInput");
+if (customInput) customInput.value = "";
+
             if (micBtn) {
                 micBtn.classList.add("listening");
                 micBtn.textContent = "🛑 聞き取り中…";
