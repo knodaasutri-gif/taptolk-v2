@@ -392,6 +392,9 @@ function formatTimeText(timeVal) {
     const parts = timeVal.split(":");
     const hours = parseInt(parts[0], 10);
     const minutes = parseInt(parts[1], 10);
+
+    if (isNaN(hours)) return "";
+
     return minutes === 0 ? `${hours}時` : `${hours}時${minutes}分`;
 }
 
