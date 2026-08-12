@@ -257,9 +257,10 @@ function initSpeechRecognition() {
             speechText.textContent = transcript;
         }
         // 自由入力欄にも自動セット（手修正しやすくするため）
-        if (customInput) {
-            customInput.value = transcript;
-        }
+// if (customInput) {
+//     customInput.value = transcript;
+// }
+
     };
 
     recognition.onend = () => {
