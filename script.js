@@ -512,19 +512,32 @@ function clearDisplay() {
         speechPlaceholder.style.display = "inline";
     }
 }
-// --- お気に入り機能の実装（完全修正版） ---
+    const favorites = getFavorites();
+    const cards = document.querySelectorAll(".card, .phrase-card, .card-item");
 
-// 保存されているお気に入りリストを取得 (配列形式)
+    if (category === 'favorite') {
+        cards.forEach(card => {
+            const cardId = card.getAttribute("data-id") || card.innerText.replace("★", "").replace("☆", "").trim();
+            if (favorites.includes(cardId)) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+// --- お気に入り機能の実装（修正版） ---
+
 function getFavorites() {
-    const favs = localStorage.getItem("favoriteCards");
-    return favs ? JSON.parse(favs) : [];
+    try {
+        const favs = localStorage.getItem("favoriteCards");
+        return favs ? JSON.parse(favs) : [];
+    } catch (e) {
+        return [];
+    }
 }
 
-// お気に入りのオン/オフを切り替える
 function toggleFavorite(cardId, event) {
-    if (event) {
-        event.stopPropagation(); // カード本体のタップ（発話等）が動くのを防ぐ
-    }
+    if (event) event.stopPropagation();
     if (typeof triggerHaptic === 'function') triggerHaptic();
 
     let favorites = getFavorites();
@@ -540,16 +553,14 @@ function toggleFavorite(cardId, event) {
     updateFavoriteUI();
 }
 
-// UI上の⭐マークの表示更新（カード描画後に確実に呼ぶ）
 function updateFavoriteUI() {
     const favorites = getFavorites();
     const cards = document.querySelectorAll(".card, .phrase-card, .card-item");
 
     cards.forEach(card => {
-        // カードの識別子を取得（data-id、またはテキスト内容）
         const cardId = card.getAttribute("data-id") || card.innerText.replace("★", "").replace("☆", "").trim();
-        
-        // すでに星ボタンがあるか確認、無ければ生成
+        if (!cardId) return;
+
         let starBtn = card.querySelector(".star-btn");
         if (!starBtn) {
             starBtn = document.createElement("button");
@@ -559,7 +570,6 @@ function updateFavoriteUI() {
             card.appendChild(starBtn);
         }
 
-        // お気に入り状態の反映
         if (favorites.includes(cardId)) {
             card.classList.add("is-favorite");
             starBtn.innerText = "★";
@@ -570,48 +580,10 @@ function updateFavoriteUI() {
     });
 }
 
-// カテゴリー切替・絞り込み処理
-const originalFilterCategory = window.filterCategory;
-window.filterCategory = function(category) {
-    // 既存の切り替え処理があれば先に実行
-    if (typeof originalFilterCategory === 'function' && category !== 'favorite') {
-        originalFilterCategory(category);
-    }
-
-    const favorites = getFavorites();
-    const cards = document.querySelectorAll(".card, .phrase-card, .card-item");
-
-    if (category === 'favorite') {
-        cards.forEach(card => {
-            const cardId = card.getAttribute("data-id") || card.innerText.replace("★", "").replace("☆", "").trim();
-            if (favorites.includes(cardId)) {
-                card.style.display = "";
-            } else {
-                card.style.display = "none";
-            }
-        });
-    }
-
-    // タブのアクティブ表示切り替え
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.getAttribute("data-category") === category);
-    });
-
-    // 切り替え後にも星マークを再適用
-    setTimeout(updateFavoriteUI, 50);
-};
-
-// 画面の変化（カード再描画）を常時監視して星マークを自動付与する仕組み
-const cardsGridObserver = new MutationObserver(() => {
-    updateFavoriteUI();
-});
-
+// 画面読み込み時と定期更新（安全な実行方法）
 document.addEventListener("DOMContentLoaded", () => {
-    updateFavoriteUI();
-    
-    // カードが配置されるエリアの変更を監視開始
-    const grid = document.getElementById("cardsGrid");
-    if (grid) {
-        cardsGridObserver.observe(grid, { childList: true, subtree: true });
-    }
+    setTimeout(updateFavoriteUI, 500);
+    setInterval(updateFavoriteUI, 2000);
 });
+
+    
