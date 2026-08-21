@@ -512,7 +512,7 @@ function clearDisplay() {
         speechPlaceholder.style.display = "inline";
     }
 }
-// --- お気に入り機能の実装 ---
+// --- お気に入り機能の実装（完全修正版） ---
 
 // 保存されているお気に入りリストを取得 (配列形式)
 function getFavorites() {
@@ -531,10 +531,8 @@ function toggleFavorite(cardId, event) {
     const index = favorites.indexOf(cardId);
 
     if (index > -1) {
-        // すでに登録されていれば削除
         favorites.splice(index, 1);
     } else {
-        // 未登録なら追加
         favorites.push(cardId);
     }
 
@@ -542,24 +540,26 @@ function toggleFavorite(cardId, event) {
     updateFavoriteUI();
 }
 
-// UI上の⭐マークの表示更新
+// UI上の⭐マークの表示更新（カード描画後に確実に呼ぶ）
 function updateFavoriteUI() {
     const favorites = getFavorites();
     const cards = document.querySelectorAll(".card, .phrase-card, .card-item");
 
     cards.forEach(card => {
-        // IDやテキストからカードを識別
+        // カードの識別子を取得（data-id、またはテキスト内容）
         const cardId = card.getAttribute("data-id") || card.innerText.replace("★", "").replace("☆", "").trim();
         
-        // 星ボタンがまだ無ければ自動生成する
+        // すでに星ボタンがあるか確認、無ければ生成
         let starBtn = card.querySelector(".star-btn");
         if (!starBtn) {
             starBtn = document.createElement("button");
             starBtn.className = "star-btn";
+            starBtn.type = "button";
             starBtn.onclick = (e) => toggleFavorite(cardId, e);
             card.appendChild(starBtn);
         }
 
+        // お気に入り状態の反映
         if (favorites.includes(cardId)) {
             card.classList.add("is-favorite");
             starBtn.innerText = "★";
@@ -570,9 +570,14 @@ function updateFavoriteUI() {
     });
 }
 
-// カテゴリー絞り込み処理
+// カテゴリー切替・絞り込み処理
 const originalFilterCategory = window.filterCategory;
 window.filterCategory = function(category) {
+    // 既存の切り替え処理があれば先に実行
+    if (typeof originalFilterCategory === 'function' && category !== 'favorite') {
+        originalFilterCategory(category);
+    }
+
     const favorites = getFavorites();
     const cards = document.querySelectorAll(".card, .phrase-card, .card-item");
 
@@ -585,21 +590,28 @@ window.filterCategory = function(category) {
                 card.style.display = "none";
             }
         });
-    } else {
-        cards.forEach(card => card.style.display = "");
-        if (typeof originalFilterCategory === 'function' && category !== 'all') {
-            originalFilterCategory(category);
-        }
     }
-    
-    // タブの選択状態（見た目）を切り替え
+
+    // タブのアクティブ表示切り替え
     document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.classList.toggle("active", btn.getAttribute("data-category") === category);
     });
+
+    // 切り替え後にも星マークを再適用
+    setTimeout(updateFavoriteUI, 50);
 };
 
-// 画面読み込み時・表示更新時に⭐マークをセット
-document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(updateFavoriteUI, 300);
+// 画面の変化（カード再描画）を常時監視して星マークを自動付与する仕組み
+const cardsGridObserver = new MutationObserver(() => {
+    updateFavoriteUI();
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+    updateFavoriteUI();
+    
+    // カードが配置されるエリアの変更を監視開始
+    const grid = document.getElementById("cardsGrid");
+    if (grid) {
+        cardsGridObserver.observe(grid, { childList: true, subtree: true });
+    }
+});
