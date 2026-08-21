@@ -390,7 +390,17 @@ function setQuickDate(addDays) {
     if (leaveDateInput) {
         leaveDateInput.value = d.toISOString().split('T')[0];
     }
+    // --- ボタンの色を選択状態に保つ処理 ---
+    const btns = document.querySelectorAll(".quick-date-btns button");
+    btns.forEach((btn, index) => {
+        if (index === addDays) {
+            btn.classList.add("selected");
+        } else {
+            btn.classList.remove("selected");
+        }
+    });
 }
+
 
 function formatTimeText(timeVal) {
     if (!timeVal) return "";
