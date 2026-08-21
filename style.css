@@ -310,12 +310,14 @@ body.manage-mode .delete-card-btn { display: block; }
 .toast-msg.show { transform: translateX(-50%) translateY(0); }
 /* --- 第1段階：タップ時の色変化＆選択状態のスタイル追加 --- */
 
-/* 1. カードをタップした瞬間に少し縮んで色が変わる効果 */
+/* 1. カードを押した瞬間にパッと分かる変化（やわらかい青色＋少し沈む） */
 .card:active {
-    transform: scale(0.95);
-    background-color: #e2e8f0;
+    transform: scale(0.95) !important;
+    background-color: #dbeafe !important;
+    border-color: #3b82f6 !important;
     transition: all 0.1s ease;
 }
+
 
 /* 2. お休み・遅刻カレンダーの「今日・明日・明後日」選択中の色 */
 .qdate-btn:focus,
