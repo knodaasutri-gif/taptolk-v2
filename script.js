@@ -463,17 +463,24 @@ function setQuickDate(addDays) {
     });
 }
 
-// 自由入力欄のクリア処理
-function clearCustomInput() {
-    const input = document.getElementById("customTextInput");
-    if (input) {
-        input.value = "";
-    }
-}
 // 表示エリアの文字をクリアする処理
 function clearDisplay() {
-    const displayText = document.getElementById("displayText");
-    if (displayText) {
-        displayText.innerText = "カードをタップするとここに文字が表示されます";
+    const speechText = document.getElementById("speechText");
+    const speechPlaceholder = document.getElementById("speechPlaceholder");
+    
+    // 読み上げ中の音声があれば停止
+    if (typeof stopSpeech === 'function') {
+        stopSpeech();
+    }
+    
+    // 表示テキストを消去
+    if (speechText) {
+        speechText.innerText = "";
+        speechText.style.display = "none";
+    }
+    
+    // プレースホルダー（案内文）を再表示
+    if (speechPlaceholder) {
+        speechPlaceholder.style.display = "inline";
     }
 }
