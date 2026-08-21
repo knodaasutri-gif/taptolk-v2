@@ -390,13 +390,13 @@ function setQuickDate(addDays) {
     if (leaveDateInput) {
         leaveDateInput.value = d.toISOString().split('T')[0];
     }
-    // --- ボタンの色を選択状態に保つ処理 ---
+    // クイック日付ボタンの選択スタイル（青色）を切り替える処理
     const btns = document.querySelectorAll(".quick-date-btns button");
     btns.forEach((btn, index) => {
         if (index === addDays) {
-            btn.classList.add("selected");
+            btn.classList.add("active-date");
         } else {
-            btn.classList.remove("selected");
+            btn.classList.remove("active-date");
         }
     });
 }
