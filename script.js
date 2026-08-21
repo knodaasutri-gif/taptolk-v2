@@ -484,3 +484,32 @@ function clearDisplay() {
         speechPlaceholder.style.display = "inline";
     }
 }
+// 自由入力欄のクリア処理（触感追加）
+function clearCustomInput() {
+    if (typeof triggerHaptic === 'function') triggerHaptic();
+    const input = document.getElementById("customTextInput");
+    if (input) {
+        input.value = "";
+    }
+}
+
+// 表示エリアのクリア処理（触感追加）
+function clearDisplay() {
+    if (typeof triggerHaptic === 'function') triggerHaptic();
+    const speechText = document.getElementById("speechText");
+    const speechPlaceholder = document.getElementById("speechPlaceholder");
+    
+    if (typeof stopSpeech === 'function') {
+        stopSpeech();
+    }
+    
+    if (speechText) {
+        speechText.innerText = "";
+        speechText.style.display = "none";
+    }
+    
+    if (speechPlaceholder) {
+        speechPlaceholder.style.display = "inline";
+    }
+}
+
