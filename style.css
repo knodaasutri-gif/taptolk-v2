@@ -10,7 +10,6 @@
     --radius: 16px;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
-
 * {
     box-sizing: border-box;
     margin: 0;
@@ -18,7 +17,6 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-tap-highlight-color: transparent;
 }
-
 body {
     background-color: var(--bg-color);
     color: var(--text);
@@ -26,7 +24,6 @@ body {
     display: flex;
     justify-content: center;
 }
-
 .app-container {
     width: 100%;
     max-width: 480px;
@@ -34,7 +31,6 @@ body {
     flex-direction: column;
     gap: 12px;
 }
-
 .speech-display {
     background: var(--card-bg);
     padding: 16px;
@@ -50,30 +46,17 @@ body {
     position: relative;
     gap: 10px;
 }
-
+.placeholder-text {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: normal;
+}
 .speech-control-btns {
     display: flex;
     flex-direction: column;
     gap: 6px;
     flex-shrink: 0;
 }
-
-
-.placeholder-text {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    font-weight: normal;
-}
-.clear-input-btn {
-    background: #e2e8f0;
-    border: none;
-    padding: 0 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    color: #64748b;
-    font-weight: bold;
-}
-
 .stop-btn {
     background: var(--danger);
     color: white;
@@ -85,6 +68,17 @@ body {
     white-space: nowrap;
     font-size: 0.85rem;
 }
+.clear-btn {
+    background: #64748b;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 0.85rem;
+}
 .text-input-container {
     display: none;
     gap: 8px;
@@ -115,50 +109,11 @@ body {
     font-weight: bold;
     cursor: pointer;
 }
-
-.clear-btn {
-    background: #64748b;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    white-space: nowrap;
-    font-size: 0.85rem;
-}
-
-
-.text-input-container {
-    display: none;
-    gap: 8px;
-}
-
-.text-input-container input {
-    flex: 1;
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid #cbd5e1;
-    font-size: 1rem;
-    outline: none;
-}
-
-.submit-btn {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
 .action-bar {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
 }
-
 .action-btn {
     padding: 10px 4px;
     border: none;
@@ -168,23 +123,19 @@ body {
     cursor: pointer;
     box-shadow: var(--shadow);
 }
-
 .mic-btn { background: #3b82f6; color: white; }
 .mic-btn.listening {
     background: var(--danger);
     animation: pulse 1.5s infinite;
 }
-
 @keyframes pulse {
     0% { opacity: 1; }
     50% { opacity: 0.6; }
     100% { opacity: 1; }
 }
-
 .text-btn { background: #a855f7; color: white; }
 .add-btn { background: #10b981; color: white; }
 .manage-btn { background: #e2e8f0; color: var(--text); }
-
 .category-tabs {
     display: flex;
     gap: 8px;
@@ -192,9 +143,7 @@ body {
     padding-bottom: 4px;
     scrollbar-width: none;
 }
-
 .category-tabs::-webkit-scrollbar { display: none; }
-
 .tab-btn {
     padding: 8px 14px;
     border-radius: 20px;
@@ -204,51 +153,50 @@ body {
     white-space: nowrap;
     cursor: pointer;
 }
-
 .tab-btn.active {
     background: var(--primary);
     color: white;
     border-color: var(--primary);
     font-weight: bold;
 }
-
 .calendar-section {
     background: white;
     padding: 12px;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
 }
-
 .calendar-section h3 {
     font-size: 0.95rem;
     margin-bottom: 8px;
 }
-
 .cal-controls {
     display: flex;
     gap: 8px;
     margin-bottom: 8px;
 }
-
 .cal-controls input[type="date"] {
     padding: 6px;
     border-radius: 8px;
     border: 1px solid #cbd5e1;
 }
-
 .quick-date-btns {
     display: flex;
     gap: 4px;
 }
-
-.quick-date-btns button {
+.quick-date-btns .qdate-btn {
     padding: 6px 8px;
     border: 1px solid #cbd5e1;
     background: #f8fafc;
     border-radius: 6px;
     font-size: 0.8rem;
+    cursor: pointer;
 }
-
+.quick-date-btns .qdate-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    font-weight: bold;
+}
 .time-select-row {
     margin-bottom: 10px;
     font-size: 0.85rem;
@@ -256,19 +204,16 @@ body {
     align-items: center;
     gap: 8px;
 }
-
 .time-select-row select {
     padding: 4px 8px;
     border-radius: 6px;
     border: 1px solid #cbd5e1;
 }
-
 .quick-leave-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6px;
 }
-
 .leave-quick-btn {
     padding: 8px;
     background: #f1f5f9;
@@ -279,13 +224,11 @@ body {
     text-align: left;
     color: var(--primary);
 }
-
 .cards-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
 }
-
 .card {
     background: var(--card-bg);
     padding: 16px;
@@ -299,11 +242,32 @@ body {
     min-height: 100px;
     cursor: pointer;
     position: relative;
+    transition: all 0.2s ease;
 }
-
+.card:active {
+    transform: scale(0.95);
+}
+.card.speaking {
+    border: 3px solid var(--primary);
+    background-color: var(--primary-light);
+    transform: scale(1.02);
+}
 .card-icon { font-size: 2rem; margin-bottom: 6px; }
 .card-text { font-size: 0.95rem; font-weight: bold; line-height: 1.3; }
-
+.fav-card-btn {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.2s;
+}
+.fav-card-btn.is-fav {
+    opacity: 1;
+}
 .delete-card-btn {
     display: none;
     position: absolute;
@@ -318,9 +282,7 @@ body {
     font-weight: bold;
     cursor: pointer;
 }
-
 body.manage-mode .delete-card-btn { display: block; }
-
 .modal-overlay {
     display: none;
     position: fixed;
@@ -330,7 +292,6 @@ body.manage-mode .delete-card-btn { display: block; }
     justify-content: center;
     z-index: 100;
 }
-
 .modal {
     background: white;
     padding: 20px;
@@ -338,7 +299,6 @@ body.manage-mode .delete-card-btn { display: block; }
     width: 90%;
     max-width: 360px;
 }
-
 .modal-header { font-weight: bold; margin-bottom: 12px; font-size: 1.1rem; }
 .form-group { margin-bottom: 12px; }
 .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
@@ -348,12 +308,10 @@ body.manage-mode .delete-card-btn { display: block; }
     border-radius: 8px;
     border: 1px solid #cbd5e1;
 }
-
 .modal-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 .modal-btn { padding: 8px 16px; border-radius: 8px; border: none; font-weight: bold; }
 .modal-btn.cancel { background: #e2e8f0; }
 .modal-btn.save { background: var(--primary); color: white; }
-
 .toast-msg {
     position: fixed;
     bottom: 20px;
@@ -367,5 +325,4 @@ body.manage-mode .delete-card-btn { display: block; }
     transition: transform 0.3s ease;
     z-index: 200;
 }
-
 .toast-msg.show { transform: translateX(-50%) translateY(0); }
