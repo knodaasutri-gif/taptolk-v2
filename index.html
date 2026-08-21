@@ -19,6 +19,7 @@
         <!-- 自由入力用インプット -->
         <div class="text-input-container" id="textInputContainer">
             <input type="text" id="customTextInput" placeholder="伝えたい言葉を入力..." onkeypress="handleKeyPress(event)">
+            <button id="clearInputBtn" onclick="clearCustomInput()">クリア</button>
             <button class="submit-btn" onclick="speakCustomInput()">発話</button>
         </div>
 
