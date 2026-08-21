@@ -403,25 +403,29 @@ button:active {
     flex: 0 0 auto !important;
     margin: 0 !important;
 }
-/* --- お気に入り機能用スタイル --- */
+/* --- お気に入り機能用スタイル（見た目・サイズ調整版） --- */
 .card {
-    position: relative;
+    position: relative !important;
 }
 
 .star-btn {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    background: none !important;
+    position: absolute !important;
+    top: 6px !important;
+    right: 8px !important;
+    background: transparent !important;
     border: none !important;
-    font-size: 1.3rem;
-    color: #f59e0b !important; /* ★の色（ゴールド） */
+    font-size: 1.8rem !important; /* 星のサイズを大きく変更 */
+    color: #f59e0b !important;  /* ゴールドカラー */
     cursor: pointer;
     padding: 4px;
-    z-index: 5;
+    z-index: 10;
     line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+/* お気に入り登録時のカード強調線 */
 .is-favorite {
     border: 2px solid #f59e0b !important;
 }
