@@ -470,3 +470,10 @@ function clearCustomInput() {
         input.value = "";
     }
 }
+// 表示エリアの文字をクリアする処理
+function clearDisplay() {
+    const displayText = document.getElementById("displayText");
+    if (displayText) {
+        displayText.innerText = "カードをタップするとここに文字が表示されます";
+    }
+}
