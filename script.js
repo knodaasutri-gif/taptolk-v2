@@ -442,8 +442,8 @@ function generateLeaveCard(typeText, icon, includeTime) {
 
 window.onload = initApp;
 // 自由入力欄の文字を一括消去する処理
-function clearCustomInput() {
-    const input = document.getElementById("customInput");
+function clearCustomInput() {/
+    const input = document.getElementById("customTextInput");
     if (input) {
         input.value = "";
         input.focus(); // 消去後すぐに再入力できるようにフォーカスを当てる
