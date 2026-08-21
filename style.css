@@ -336,5 +336,21 @@ button.card:active,
     font-weight: bold !important;
     border-color: #1d4ed8 !important;
 }
+/* --- 第2段階：クリアボタンのスタイル --- */
+#clearInputBtn {
+    background-color: #94a3b8 !important;
+    color: #ffffff !important;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-right: 4px;
+}
+
+#clearInputBtn:active {
+    background-color: #64748b !important;
+    transform: scale(0.95);
+}
+
 
 
