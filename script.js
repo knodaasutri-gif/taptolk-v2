@@ -441,3 +441,21 @@ function generateLeaveCard(typeText, icon, includeTime) {
 }
 
 window.onload = initApp;
+// 自由入力欄の文字を一括消去する処理
+function clearCustomInput() {
+    const input = document.getElementById("customInput");
+    if (input) {
+        input.value = "";
+        input.focus(); // 消去後すぐに再入力できるようにフォーカスを当てる
+    }
+}
+
+// 送信成功時にも自動で入力欄を空にする（sendCustomMessageの補完）
+const originalSendCustomMessage = window.sendCustomMessage;
+window.sendCustomMessage = function() {
+    if (typeof originalSendCustomMessage === 'function') {
+        originalSendCustomMessage();
+    }
+    clearCustomInput();
+};
+
