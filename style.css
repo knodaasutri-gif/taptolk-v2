@@ -48,12 +48,30 @@ body {
     font-weight: bold;
     word-break: break-all;
     position: relative;
+    gap: 10px;
 }
+
+.speech-control-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
 
 .placeholder-text {
     color: var(--text-muted);
     font-size: 0.95rem;
     font-weight: normal;
+}
+.clear-input-btn {
+    background: #e2e8f0;
+    border: none;
+    padding: 0 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #64748b;
+    font-weight: bold;
 }
 
 .stop-btn {
