@@ -441,20 +441,32 @@ function generateLeaveCard(typeText, icon, includeTime) {
 }
 
 window.onload = initApp;
-// --- 自由入力欄の文字を一括消去する処理 ---
+// 日付ボタンの処理
+function setQuickDate(addDays) {
+    if (typeof triggerHaptic === 'function') {
+        triggerHaptic();
+    }
+    const d = new Date();
+    d.setDate(d.getDate() + addDays);
+    const leaveDateInput = document.getElementById("leaveDateInput");
+    if (leaveDateInput) {
+        leaveDateInput.value = d.toISOString().split('T')[0];
+    }
+
+    const btns = document.querySelectorAll(".quick-date-btns button");
+    btns.forEach((btn, index) => {
+        if (index === addDays) {
+            btn.classList.add("active-date");
+        } else {
+            btn.classList.remove("active-date");
+        }
+    });
+}
+
+// 自由入力欄のクリア処理
 function clearCustomInput() {
     const input = document.getElementById("customTextInput");
     if (input) {
         input.value = "";
-        input.focus();
     }
-}
-
-// 送信時に入力欄を空にする処理（安全な記述）
-if (typeof sendCustomMessage === 'function') {
-    const originalSendCustomMessage = sendCustomMessage;
-    window.sendCustomMessage = function() {
-        originalSendCustomMessage();
-        clearCustomInput();
-    };
 }
