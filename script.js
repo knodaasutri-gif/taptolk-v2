@@ -525,8 +525,9 @@ function clearDisplay() {
             }
         });
     }
-// --- お気に入り機能の実装（完全安定版） ---
+// --- お気に入り機能の実装（確定版） ---
 
+// お気に入りデータの取得
 function getFavorites() {
     try {
         const favs = localStorage.getItem("favoriteCards");
@@ -536,8 +537,12 @@ function getFavorites() {
     }
 }
 
+// お気に入りの追加・削除
 function toggleFavorite(cardId, event) {
-    if (event) event.stopPropagation();
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
     if (typeof triggerHaptic === 'function') triggerHaptic();
 
     let favorites = getFavorites();
@@ -553,29 +558,29 @@ function toggleFavorite(cardId, event) {
     updateFavoriteUI();
 }
 
+// 全カードに星ボタンをセット＆状態の更新
 function updateFavoriteUI() {
     const favorites = getFavorites();
     const cards = document.querySelectorAll(".card, .phrase-card, .card-item, .leave-quick-btn");
 
     cards.forEach(card => {
-        // カード固有のテキストを取得（星マークの記号を除外）
-        let textNode = card.getAttribute("data-id") || card.innerText;
-        textNode = textNode.replace(/[★☆]/g, "").trim();
-        if (!textNode) return;
+        // カードのテキスト内容から識別IDを作成
+        let cardId = card.getAttribute("data-id") || card.innerText;
+        cardId = cardId.replace(/[★☆]/g, "").trim();
+        if (!cardId) return;
 
         let starBtn = card.querySelector(".star-btn");
         if (!starBtn) {
             starBtn = document.createElement("button");
             starBtn.className = "star-btn";
             starBtn.type = "button";
-            starBtn.onclick = (e) => toggleFavorite(textNode, e);
             card.appendChild(starBtn);
-        } else {
-            // イベントの二重登録を防ぐため更新
-            starBtn.onclick = (e) => toggleFavorite(textNode, e);
         }
 
-        if (favorites.includes(textNode)) {
+        // クリックイベントの確実な登録
+        starBtn.onclick = (e) => toggleFavorite(cardId, e);
+
+        if (favorites.includes(cardId)) {
             card.classList.add("is-favorite");
             starBtn.innerText = "★";
         } else {
@@ -585,13 +590,48 @@ function updateFavoriteUI() {
     });
 }
 
-// 無限ループを防ぎ、カード操作時（タップ・カテゴリ移動時）だけ安全に星を更新する
-document.addEventListener("click", (e) => {
-    // 星ボタン以外のタップ、または画面更新後に星マークを安全に再適用
-    setTimeout(updateFavoriteUI, 100);
-});
+// お気に入りタブの絞り込み処理
+window.filterCategory = function(category) {
+    const favorites = getFavorites();
+    const cards = document.querySelectorAll(".card, .phrase-card, .card-item, .leave-quick-btn");
 
-// 画面読み込み時に一度実行
+    // タブの見た目（activeクラス）を切り替え
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        if (btn.getAttribute("data-category") === category) {
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
+
+    if (category === 'favorite') {
+        // お気に入りカードのみ表示
+        cards.forEach(card => {
+            let cardId = card.getAttribute("data-id") || card.innerText;
+            cardId = cardId.replace(/[★☆]/g, "").trim();
+
+            if (favorites.includes(cardId)) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    } else {
+        // すべて表示（または他のカテゴリ処理）
+        cards.forEach(card => {
+            card.style.display = "";
+        });
+    }
+
+    updateFavoriteUI();
+};
+
+// 画面読み込み時・操作時に安定して実行
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(updateFavoriteUI, 300);
+});
+
+// タップ操作などの後に星マークのつき直しを確認
+document.addEventListener("click", () => {
+    setTimeout(updateFavoriteUI, 200);
 });
