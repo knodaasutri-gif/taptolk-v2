@@ -441,21 +441,20 @@ function generateLeaveCard(typeText, icon, includeTime) {
 }
 
 window.onload = initApp;
-// 自由入力欄の文字を一括消去する処理
-function clearCustomInput() {/
+// --- 自由入力欄の文字を一括消去する処理 ---
+function clearCustomInput() {
     const input = document.getElementById("customTextInput");
     if (input) {
         input.value = "";
-        input.focus(); // 消去後すぐに再入力できるようにフォーカスを当てる
+        input.focus();
     }
 }
 
-// 送信成功時にも自動で入力欄を空にする（sendCustomMessageの補完）
-const originalSendCustomMessage = window.sendCustomMessage;
-window.sendCustomMessage = function() {
-    if (typeof originalSendCustomMessage === 'function') {
+// 送信時に入力欄を空にする処理（安全な記述）
+if (typeof sendCustomMessage === 'function') {
+    const originalSendCustomMessage = sendCustomMessage;
+    window.sendCustomMessage = function() {
         originalSendCustomMessage();
-    }
-    clearCustomInput();
-};
-
+        clearCustomInput();
+    };
+}
