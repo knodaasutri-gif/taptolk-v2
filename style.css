@@ -368,6 +368,41 @@ button.card:active,
     background-color: #475569 !important;
     transform: scale(0.95);
 }
+/* --- 第3段階：全体UI・ボタンアニメーションの最終調整 --- */
+
+/* 全ボタンのタップ時アニメーションと基本スタイル */
+button {
+    transition: transform 0.1s ease, background-color 0.2s ease, box-shadow 0.2s ease !important;
+    touch-action: manipulation; /* スマホでのダブルタップズームを防止 */
+}
+
+/* ボタンを押した瞬間の沈み込み演出 */
+button:active {
+    transform: scale(0.94) !important;
+    opacity: 0.85;
+}
+
+/* 表示エリア（クリア・停止ボタン周辺）のレイアウト安定化 */
+.speech-display {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    padding: 12px 16px !important;
+}
+
+/* テキスト部分がボタンを押し出さないように伸縮指定 */
+.placeholder-text, .speech-text {
+    flex: 1 1 100% !important;
+    word-break: break-all !important;
+    margin-bottom: 8px !important;
+}
+
+/* 右側に並ぶクリア・停止ボタンのサイズと配置 */
+#clearDisplayBtn, .stop-btn {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+}
 
 
 
