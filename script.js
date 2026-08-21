@@ -512,4 +512,94 @@ function clearDisplay() {
         speechPlaceholder.style.display = "inline";
     }
 }
+// --- お気に入り機能の実装 ---
+
+// 保存されているお気に入りリストを取得 (配列形式)
+function getFavorites() {
+    const favs = localStorage.getItem("favoriteCards");
+    return favs ? JSON.parse(favs) : [];
+}
+
+// お気に入りのオン/オフを切り替える
+function toggleFavorite(cardId, event) {
+    if (event) {
+        event.stopPropagation(); // カード本体のタップ（発話等）が動くのを防ぐ
+    }
+    if (typeof triggerHaptic === 'function') triggerHaptic();
+
+    let favorites = getFavorites();
+    const index = favorites.indexOf(cardId);
+
+    if (index > -1) {
+        // すでに登録されていれば削除
+        favorites.splice(index, 1);
+    } else {
+        // 未登録なら追加
+        favorites.push(cardId);
+    }
+
+    localStorage.setItem("favoriteCards", JSON.stringify(favorites));
+    updateFavoriteUI();
+}
+
+// UI上の⭐マークの表示更新
+function updateFavoriteUI() {
+    const favorites = getFavorites();
+    const cards = document.querySelectorAll(".card, .phrase-card, .card-item");
+
+    cards.forEach(card => {
+        // IDやテキストからカードを識別
+        const cardId = card.getAttribute("data-id") || card.innerText.replace("★", "").replace("☆", "").trim();
+        
+        // 星ボタンがまだ無ければ自動生成する
+        let starBtn = card.querySelector(".star-btn");
+        if (!starBtn) {
+            starBtn = document.createElement("button");
+            starBtn.className = "star-btn";
+            starBtn.onclick = (e) => toggleFavorite(cardId, e);
+            card.appendChild(starBtn);
+        }
+
+        if (favorites.includes(cardId)) {
+            card.classList.add("is-favorite");
+            starBtn.innerText = "★";
+        } else {
+            card.classList.remove("is-favorite");
+            starBtn.innerText = "☆";
+        }
+    });
+}
+
+// カテゴリー絞り込み処理
+const originalFilterCategory = window.filterCategory;
+window.filterCategory = function(category) {
+    const favorites = getFavorites();
+    const cards = document.querySelectorAll(".card, .phrase-card, .card-item");
+
+    if (category === 'favorite') {
+        cards.forEach(card => {
+            const cardId = card.getAttribute("data-id") || card.innerText.replace("★", "").replace("☆", "").trim();
+            if (favorites.includes(cardId)) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    } else {
+        cards.forEach(card => card.style.display = "");
+        if (typeof originalFilterCategory === 'function' && category !== 'all') {
+            originalFilterCategory(category);
+        }
+    }
+    
+    // タブの選択状態（見た目）を切り替え
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-category") === category);
+    });
+};
+
+// 画面読み込み時・表示更新時に⭐マークをセット
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(updateFavoriteUI, 300);
+});
 
