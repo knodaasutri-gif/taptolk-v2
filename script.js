@@ -525,7 +525,7 @@ function clearDisplay() {
             }
         });
     }
-// --- お気に入り機能の実装（修正版） ---
+// --- お気に入り機能の実装 ---
 
 function getFavorites() {
     try {
@@ -555,7 +555,7 @@ function toggleFavorite(cardId, event) {
 
 function updateFavoriteUI() {
     const favorites = getFavorites();
-    const cards = document.querySelectorAll(".card, .phrase-card, .card-item");
+    const cards = document.querySelectorAll(".card, .phrase-card, .card-item, .quick-leave-grid button");
 
     cards.forEach(card => {
         const cardId = card.getAttribute("data-id") || card.innerText.replace("★", "").replace("☆", "").trim();
@@ -580,10 +580,25 @@ function updateFavoriteUI() {
     });
 }
 
-// 画面読み込み時と定期更新（安全な実行方法）
-document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(updateFavoriteUI, 500);
-    setInterval(updateFavoriteUI, 2000);
-});
+// 元のrenderCards（カード描画処理）を横取りして、描画直後に星を必ず付与する
+if (typeof renderCards === 'function') {
+    const originalRenderCards = renderCards;
+    window.renderCards = function(...args) {
+        originalRenderCards.apply(this, args);
+        setTimeout(updateFavoriteUI, 10);
+    };
+}
 
-    
+// カテゴリー切替時にも星を付け直す
+if (typeof filterCategory === 'function') {
+    const originalFilterCategory = window.filterCategory;
+    window.filterCategory = function(category) {
+        originalFilterCategory(category);
+        setTimeout(updateFavoriteUI, 10);
+    };
+}
+
+// 初期ロード時の実行
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(updateFavoriteUI, 100);
+});
