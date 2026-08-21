@@ -3,92 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ワンタッチ意思表示カード</title>
+    <title>TapTalk Mobile</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div class="app-container">
-        <!-- 読み上げテキスト表示エリア -->
+        <!-- 発話・認識テキスト表示エリア -->
         <div class="speech-display" id="speechDisplay">
-            <span id="displayText" class="placeholder-text">カードをタップするとここに文字が表示されます</span>
-            <div class="speech-control-btns">
-                <button class="stop-btn" id="stopBtn" style="display: none;">🛑 停止</button>
-                <button class="clear-btn" id="clearBtn" style="display: none;">🧹 クリア</button>
-            </div>
+            <span class="placeholder-text" id="speechPlaceholder">カードをタップするとここに文字が表示されます</span>
+            <span class="speech-text" id="speechText" style="display: none;"></span>
+            <button class="stop-btn" id="stopBtn" onclick="stopSpeech()">🛑 停止</button>
         </div>
 
-        <!-- 自由テキスト入力欄 (初期状態は非表示) -->
+        <!-- 自由入力用インプット -->
         <div class="text-input-container" id="textInputContainer">
-            <input type="text" id="customTextInput" placeholder="伝えたい言葉を入力...">
-            <button class="clear-input-btn" id="clearInputBtn">✕</button>
-            <button class="submit-btn" id="submitTextBtn">発話</button>
+            <input type="text" id="customTextInput" placeholder="伝えたい言葉を入力..." onkeypress="handleKeyPress(event)">
+            <button class="submit-btn" onclick="speakCustomInput()">発話</button>
         </div>
 
-        <!-- 操作バー -->
+        <!-- メイン操作バー -->
         <div class="action-bar">
-            <button class="action-btn mic-btn" id="micBtn">🎤 音声入力</button>
-            <button class="action-btn text-btn" id="textToggleBtn">✏️ 自由入力</button>
-            <button class="action-btn add-btn" id="openAddModalBtn">➕ カード作成</button>
-            <button class="action-btn manage-btn" id="manageBtn">⚙️ 編集</button>
+            <button class="action-btn mic-btn" id="micBtn" onclick="toggleSpeechRecognition()">🎤 音声入力</button>
+            <button class="action-btn text-btn" onclick="toggleTextInput()">✏️ 自由入力</button>
+            <button class="action-btn add-btn" onclick="openAddModal()">➕ カード作成</button>
+            <button class="action-btn manage-btn" id="manageBtn" onclick="toggleManageMode()">⚙️ 編集</button>
         </div>
 
-        <!-- カテゴリタブ -->
-        <div class="category-tabs" id="categoryTabs">
-            <!-- JSで動的生成 -->
-        </div>
+        <!-- カテゴリータブ -->
+        <div class="category-tabs" id="categoryTabs"></div>
 
-        <!-- 日時指定エリア (特定カテゴリ選択時に表示) -->
+        <!-- 日時指定エリア（お休み・遅刻用） -->
         <div class="calendar-section" id="calendarSection" style="display: none;">
             <h3>📅 日時を選んでワンタッチ連絡</h3>
             <div class="cal-controls">
-                <input type="date" id="targetDate">
+                <input type="date" id="leaveDateInput">
                 <div class="quick-date-btns">
-                    <button class="qdate-btn active" data-type="today">今日</button>
-                    <button class="qdate-btn" data-type="tomorrow">明日</button>
-                    <button class="qdate-btn" data-type="afterTomorrow">明後日</button>
+                    <button onclick="setQuickDate(0)">今日</button>
+                    <button onclick="setQuickDate(1)">明日</button>
+                    <button onclick="setQuickDate(2)">明後日</button>
                 </div>
             </div>
             <div class="time-select-row">
-                <label>⏰ 時間指定（必要な場合）：</label>
-                <select id="targetTime">
-                    <option value="">なし</option>
-                </select>
-            </div>
+    <label for="leaveTimeInput">⏰ 時間指定（必要な場合）</label>
+    <input type="time" id="leaveTimeInput">
+</div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">タップしてカード作成＆送信:</p>
             <div class="quick-leave-grid">
-                <button class="leave-quick-btn" data-type="full">📅 終日お休み</button>
-                <button class="leave-quick-btn" data-type="late">⏱️ 時間指定遅刻</button>
-                <button class="leave-quick-btn" data-type="early">🏃 時間指定早退</button>
-                <button class="leave-quick-btn" data-type="am">🌅 午前休</button>
-                <button class="leave-quick-btn" data-type="pm">🌄 午後休</button>
-                <button class="leave-quick-btn" data-type="hospital">🏥 通院（時間指定）</button>
+                <button class="leave-quick-btn" onclick="generateLeaveCard('終日お休みします', '📅', false)">📅 終日お休み</button>
+                <button class="leave-quick-btn" onclick="generateLeaveCard('遅れて出勤します', '⏱️', true)">⏱️ 時間指定遅刻</button>
+                <button class="leave-quick-btn" onclick="generateLeaveCard('早退します', '🏃', true)">🏃 時間指定早退</button>
+                <button class="leave-quick-btn" onclick="generateLeaveCard('午前休をいただきます', '🌅', false)">🌅 午前休</button>
+                <button class="leave-quick-btn" onclick="generateLeaveCard('午後休をいただきます', '🌄', false)">🌄 午後休</button>
+                <button class="leave-quick-btn" onclick="generateLeaveCard('通院のため遅れます', '🏥', true)">🏥 通院（時間指定）</button>
             </div>
         </div>
 
-        <!-- カード一覧グリッド -->
-        <div class="cards-grid" id="cardsGrid">
-            <!-- JSで動的生成 -->
-        </div>
+        <!-- カードグリッド表示エリア -->
+        <div class="cards-grid" id="cardsGrid"></div>
     </div>
 
-    <!-- カード追加モーダル -->
+    <!-- モーダル（カード追加画面） -->
     <div class="modal-overlay" id="addModal">
         <div class="modal">
             <div class="modal-header">新規カード作成</div>
             <div class="form-group">
                 <label>カテゴリー</label>
-                <select id="cardCategorySelect"></select>
+                <select id="modalCategory"></select>
             </div>
             <div class="form-group">
                 <label>アイコン (絵文字)</label>
-                <input type="text" id="cardIconInput" value="💬">
+                <input type="text" id="modalIcon" placeholder="例: 💬" value="💬">
             </div>
             <div class="form-group">
                 <label>伝える言葉</label>
-                <input type="text" id="cardTextInput" placeholder="例: お願いします">
+                <input type="text" id="modalText" placeholder="例: お願いします">
             </div>
             <div class="modal-btns">
-                <button class="modal-btn cancel" id="closeAddModalBtn">キャンセル</button>
-                <button class="modal-btn save" id="saveCardBtn">追加</button>
+                <button class="modal-btn cancel" onclick="closeAddModal()">キャンセル</button>
+                <button class="modal-btn save" onclick="saveNewCard()">追加</button>
             </div>
         </div>
     </div>
@@ -99,3 +92,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
