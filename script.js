@@ -116,10 +116,43 @@ function saveData() {
     localStorage.setItem("taptalk_pixel_v1", JSON.stringify(appData));
 }
 
+ // --- お気に入りデータの取得と保存 ---
+function getFavorites() {
+    try {
+        const favs = localStorage.getItem("favoriteCards");
+        return favs ? JSON.parse(favs) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function toggleFavorite(cardId, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    if (typeof triggerHaptic === 'function') triggerHaptic();
+
+    let favorites = getFavorites();
+    const index = favorites.indexOf(cardId);
+
+    if (index > -1) {
+        favorites.splice(index, 1);
+    } else {
+        favorites.push(cardId);
+    }
+
+    localStorage.setItem("favoriteCards", JSON.stringify(favorites));
+    renderCards(); // 星の表示状態を即座に再描画
+}
+
+// --- カテゴリータブの描画（お気に入りタブを追加） ---
 function renderCategoryTabs() {
     const tabsContainer = document.getElementById("categoryTabs");
     if (!tabsContainer) return;
     tabsContainer.innerHTML = "";
+
+    // 通常のカテゴリータブを生成
     appData.forEach(cat => {
         const btn = document.createElement("button");
         btn.className = `tab-btn ${cat.id === currentCategoryId ? 'active' : ''}`;
@@ -132,39 +165,96 @@ function renderCategoryTabs() {
         };
         tabsContainer.appendChild(btn);
     });
+
+    // 「⭐ お気に入り」タブを生成
+    const favBtn = document.createElement("button");
+    favBtn.className = `tab-btn ${currentCategoryId === 'favorite' ? 'active' : ''}`;
+    favBtn.textContent = "⭐ お気に入り";
+    favBtn.onclick = () => {
+        triggerHaptic();
+        currentCategoryId = 'favorite';
+        renderCategoryTabs();
+        renderCards();
+    };
+    tabsContainer.appendChild(favBtn);
 }
 
+// --- カードの描画（星ボタンを直接埋め込み） ---
 function renderCards() {
     const grid = document.getElementById("cardsGrid");
     const calSection = document.getElementById("calendarSection");
     if (!grid) return;
     grid.innerHTML = "";
+
     if (calSection) {
         calSection.style.display = (currentCategoryId === "leave") ? "block" : "none";
     }
-    const currentCat = appData.find(c => c.id === currentCategoryId);
-    if (!currentCat || currentCat.cards.length === 0) {
+
+    const favorites = getFavorites();
+    let cardsToRender = [];
+
+    // 表示するカードの選定
+    if (currentCategoryId === 'favorite') {
+        // すべてのカテゴリーからお気に入り登録されたカードを集める
+        appData.forEach(cat => {
+            if (cat.cards) {
+                cat.cards.forEach(card => {
+                    if (favorites.includes(card.id)) {
+                        cardsToRender.push(card);
+                    }
+                });
+            }
+        });
+    } else {
+        const currentCat = appData.find(c => c.id === currentCategoryId);
+        if (currentCat && currentCat.cards) {
+            cardsToRender = currentCat.cards;
+        }
+    }
+
+    // カードが存在しない場合のメッセージ
+    if (cardsToRender.length === 0) {
         if (currentCategoryId !== "leave") {
-            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 30px 0;">カードがありません</div>`;
+            const emptyMsg = currentCategoryId === 'favorite' ? 'お気に入り登録されたカードがありません' : 'カードがありません';
+            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">${emptyMsg}</div>`;
         }
         return;
     }
-    currentCat.cards.forEach(card => {
+
+    // カードを一枚ずつ生成
+    cardsToRender.forEach(card => {
         const cardEl = document.createElement("div");
-        cardEl.className = "card";
+        const isFav = favorites.includes(card.id);
+        cardEl.className = `card ${isFav ? 'is-favorite' : ''}`;
+
         cardEl.innerHTML = `
+            <button class="star-btn" type="button">${isFav ? '★' : '☆'}</button>
             <button class="delete-card-btn" onclick="deleteCard(event, '${card.id}')">✕</button>
             <div class="card-icon">${card.icon}</div>
             <div class="card-text">${card.text}</div>
         `;
+
+        // 星ボタンのクリックイベント
+        const starBtn = cardEl.querySelector(".star-btn");
+        if (starBtn) {
+            starBtn.onclick = (e) => toggleFavorite(card.id, e);
+        }
+
+        // カード本体のクリックイベント（音声再生）
         cardEl.onclick = () => {
             if (isManageMode) return;
             triggerHaptic();
             speakText(card.text);
         };
+
         grid.appendChild(cardEl);
     });
 }
+
+            
+
+
+    
 
 function speakText(text) {
     if (isListening && recognition) {
