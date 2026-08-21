@@ -324,10 +324,12 @@ body.manage-mode .delete-card-btn { display: block; }
     color: #ffffff !important;
     font-weight: bold;
 }
-/* --- 日時ボタン選択時の保持スタイル --- */
-.quick-date-btns button.selected {
+/* クイック日付ボタンが選択された時の青色スタイル */
+.quick-date-btns button.active-date {
     background-color: #2563eb !important;
     color: #ffffff !important;
     font-weight: bold !important;
+    border-color: #1d4ed8 !important;
 }
+
 
