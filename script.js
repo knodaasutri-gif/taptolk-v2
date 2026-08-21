@@ -525,7 +525,7 @@ function clearDisplay() {
             }
         });
     }
-// --- お気に入り機能の実装 ---
+// --- お気に入り機能の実装（完全監視版） ---
 
 function getFavorites() {
     try {
@@ -555,7 +555,8 @@ function toggleFavorite(cardId, event) {
 
 function updateFavoriteUI() {
     const favorites = getFavorites();
-    const cards = document.querySelectorAll(".card, .phrase-card, .card-item, .quick-leave-grid button");
+    // 画面内にあるすべてのカード・ボタン要素を取得
+    const cards = document.querySelectorAll(".card, .phrase-card, .card-item, .leave-quick-btn");
 
     cards.forEach(card => {
         const cardId = card.getAttribute("data-id") || card.innerText.replace("★", "").replace("☆", "").trim();
@@ -580,25 +581,16 @@ function updateFavoriteUI() {
     });
 }
 
-// 元のrenderCards（カード描画処理）を横取りして、描画直後に星を必ず付与する
-if (typeof renderCards === 'function') {
-    const originalRenderCards = renderCards;
-    window.renderCards = function(...args) {
-        originalRenderCards.apply(this, args);
-        setTimeout(updateFavoriteUI, 10);
-    };
-}
-
-// カテゴリー切替時にも星を付け直す
-if (typeof filterCategory === 'function') {
-    const originalFilterCategory = window.filterCategory;
-    window.filterCategory = function(category) {
-        originalFilterCategory(category);
-        setTimeout(updateFavoriteUI, 10);
-    };
-}
-
-// 初期ロード時の実行
-document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(updateFavoriteUI, 100);
+// 画面全体の動きを常に監視し、カードが描画・変更された瞬間に星を再付与する
+const favoriteObserver = new MutationObserver(() => {
+    updateFavoriteUI();
 });
+
+// 画面読み込み完了時に監視を開始
+document.addEventListener("DOMContentLoaded", () => {
+    updateFavoriteUI();
+    favoriteObserver.observe(document.body, { childList: true, subtree: true });
+});
+
+// 予備の定期チェック（念のためのバックアップ）
+setInterval(updateFavoriteUI, 1000);
