@@ -525,7 +525,7 @@ function clearDisplay() {
             }
         });
     }
-// --- お気に入り機能の実装（完全監視版） ---
+// --- お気に入り機能の実装（完全安定版） ---
 
 function getFavorites() {
     try {
@@ -555,23 +555,27 @@ function toggleFavorite(cardId, event) {
 
 function updateFavoriteUI() {
     const favorites = getFavorites();
-    // 画面内にあるすべてのカード・ボタン要素を取得
     const cards = document.querySelectorAll(".card, .phrase-card, .card-item, .leave-quick-btn");
 
     cards.forEach(card => {
-        const cardId = card.getAttribute("data-id") || card.innerText.replace("★", "").replace("☆", "").trim();
-        if (!cardId) return;
+        // カード固有のテキストを取得（星マークの記号を除外）
+        let textNode = card.getAttribute("data-id") || card.innerText;
+        textNode = textNode.replace(/[★☆]/g, "").trim();
+        if (!textNode) return;
 
         let starBtn = card.querySelector(".star-btn");
         if (!starBtn) {
             starBtn = document.createElement("button");
             starBtn.className = "star-btn";
             starBtn.type = "button";
-            starBtn.onclick = (e) => toggleFavorite(cardId, e);
+            starBtn.onclick = (e) => toggleFavorite(textNode, e);
             card.appendChild(starBtn);
+        } else {
+            // イベントの二重登録を防ぐため更新
+            starBtn.onclick = (e) => toggleFavorite(textNode, e);
         }
 
-        if (favorites.includes(cardId)) {
+        if (favorites.includes(textNode)) {
             card.classList.add("is-favorite");
             starBtn.innerText = "★";
         } else {
@@ -581,16 +585,13 @@ function updateFavoriteUI() {
     });
 }
 
-// 画面全体の動きを常に監視し、カードが描画・変更された瞬間に星を再付与する
-const favoriteObserver = new MutationObserver(() => {
-    updateFavoriteUI();
+// 無限ループを防ぎ、カード操作時（タップ・カテゴリ移動時）だけ安全に星を更新する
+document.addEventListener("click", (e) => {
+    // 星ボタン以外のタップ、または画面更新後に星マークを安全に再適用
+    setTimeout(updateFavoriteUI, 100);
 });
 
-// 画面読み込み完了時に監視を開始
+// 画面読み込み時に一度実行
 document.addEventListener("DOMContentLoaded", () => {
-    updateFavoriteUI();
-    favoriteObserver.observe(document.body, { childList: true, subtree: true });
+    setTimeout(updateFavoriteUI, 300);
 });
-
-// 予備の定期チェック（念のためのバックアップ）
-setInterval(updateFavoriteUI, 1000);
