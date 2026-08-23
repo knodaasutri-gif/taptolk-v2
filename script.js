@@ -116,11 +116,12 @@ function saveData() {
     localStorage.setItem("taptalk_pixel_v1", JSON.stringify(appData));
 }
 
- // --- お気に入りデータの取得と保存 ---
+ // --- お気に入りデータの取得と保存（安全取得版） ---
 function getFavorites() {
     try {
         const favs = localStorage.getItem("favoriteCards");
-        return favs ? JSON.parse(favs) : [];
+        const parsed = favs ? JSON.parse(favs) : [];
+        return Array.isArray(parsed) ? parsed.map(String) : [];
     } catch (e) {
         return [];
     }
@@ -133,22 +134,27 @@ function toggleFavorite(cardId, event) {
     }
     if (typeof triggerHaptic === 'function') triggerHaptic();
 
+    // 最新のデータを毎回ローカルストレージから直に取得
     let favorites = getFavorites();
-    const targetId = String(cardId);
+    const targetId = String(cardId).trim();
 
-    // ★を外した時はリストから完全に除外する
+    if (!targetId) return;
+
     if (favorites.includes(targetId)) {
-        favorites = favorites.filter(id => String(id) !== targetId);
+        // 解除：該当IDをすべて確実に除外
+        favorites = favorites.filter(id => id !== targetId);
     } else {
-        favorites.push(targetId);
+        // 追加：重複しないように追加
+        if (!favorites.includes(targetId)) {
+            favorites.push(targetId);
+        }
     }
 
     localStorage.setItem("favoriteCards", JSON.stringify(favorites));
-    renderCards(); // 画面を更新して即座に反映
+    renderCards(); // 即座に再描画
 }
 
-
-// --- カテゴリータブの描画（お気に入りタブを追加） ---
+// --- カテゴリータブの描画 ---
 function renderCategoryTabs() {
     const tabsContainer = document.getElementById("categoryTabs");
     if (!tabsContainer) return;
@@ -181,7 +187,7 @@ function renderCategoryTabs() {
     tabsContainer.appendChild(favBtn);
 }
 
-// --- カードの描画（星ボタンを直接埋め込み） ---
+// --- カードの描画 ---
 function renderCards() {
     const grid = document.getElementById("cardsGrid");
     const calSection = document.getElementById("calendarSection");
@@ -197,12 +203,15 @@ function renderCards() {
 
     // 表示するカードの選定
     if (currentCategoryId === 'favorite') {
-        // すべてのカテゴリーからお気に入り登録されたカードを集める
+        // 全カテゴリーからお気に入りカードを収集（重複排除）
+        const addedIds = new Set();
         appData.forEach(cat => {
             if (cat.cards) {
                 cat.cards.forEach(card => {
-                    if (favorites.includes(card.id)) {
+                    const cId = String(card.id || card.text).trim();
+                    if (favorites.includes(cId) && !addedIds.has(cId)) {
                         cardsToRender.push(card);
+                        addedIds.add(cId);
                     }
                 });
             }
@@ -214,7 +223,7 @@ function renderCards() {
         }
     }
 
-    // カードが存在しない場合のメッセージ
+    // カードが存在しない場合
     if (cardsToRender.length === 0) {
         if (currentCategoryId !== "leave") {
             const emptyMsg = currentCategoryId === 'favorite' ? 'お気に入り登録されたカードがありません' : 'カードがありません';
@@ -223,10 +232,12 @@ function renderCards() {
         return;
     }
 
-    // カードを一枚ずつ生成
+    // カードを生成
     cardsToRender.forEach(card => {
         const cardEl = document.createElement("div");
-        const isFav = favorites.includes(card.id);
+        const cardId = String(card.id || card.text).trim();
+        const isFav = favorites.includes(cardId);
+        
         cardEl.className = `card ${isFav ? 'is-favorite' : ''}`;
 
         cardEl.innerHTML = `
@@ -236,13 +247,13 @@ function renderCards() {
             <div class="card-text">${card.text}</div>
         `;
 
-        // 星ボタンのクリックイベント
+        // 星ボタンクリック
         const starBtn = cardEl.querySelector(".star-btn");
         if (starBtn) {
-            starBtn.onclick = (e) => toggleFavorite(card.id, e);
+            starBtn.onclick = (e) => toggleFavorite(cardId, e);
         }
 
-        // カード本体のクリックイベント（音声再生）
+        // カード本体クリック
         cardEl.onclick = () => {
             if (isManageMode) return;
             triggerHaptic();
@@ -252,6 +263,7 @@ function renderCards() {
         grid.appendChild(cardEl);
     });
 }
+
 
             
 
