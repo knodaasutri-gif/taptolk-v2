@@ -643,3 +643,33 @@ function clearDisplay() {
             }
         });
     }
+
+// --- タイムライン制御用関数 ---
+
+// メッセージを吹き出しとして追加
+function addChatMessage(text, sender = 'right') {
+    const timeline = document.getElementById("chatTimeline");
+    if (!timeline || !text) return;
+
+    // 初期の案内メッセージがあればクリア
+    if (timeline.children.length === 1 && timeline.children[0].innerText.includes("表示されます")) {
+        timeline.innerHTML = "";
+    }
+
+    const bubble = document.createElement("div");
+    bubble.className = `chat-bubble ${sender}`;
+    bubble.textContent = text;
+
+    timeline.appendChild(bubble);
+
+    // 常に最新メッセージ（一番下）へ自動スクロール
+    timeline.scrollTop = timeline.scrollHeight;
+}
+
+// タイムラインの消去（クリアボタン用）
+function clearTimeline() {
+    const timeline = document.getElementById("chatTimeline");
+    if (timeline) {
+        timeline.innerHTML = '<div class="chat-bubble left">ここに音声やカードの文字が表示されます</div>';
+    }
+}
