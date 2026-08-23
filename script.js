@@ -281,6 +281,9 @@ function speakText(text) {
         }
     }
 
+    // ★ タイムラインに自分の発言（右側吹き出し）を追加
+    addChatMessage(text, 'right');
+
     const placeholder = document.getElementById("speechPlaceholder");
     const speechText = document.getElementById("speechText");
     if (placeholder) placeholder.style.display = "none";
@@ -288,6 +291,9 @@ function speakText(text) {
         speechText.style.display = "block";
         speechText.textContent = text;
     }
+    playTapChime();
+    // ...略...
+
     playTapChime();
     if (synth) {
         synth.cancel();
@@ -346,26 +352,34 @@ function initSpeechRecognition() {
     recognition.continuous = true;
     recognition.interimResults = true;
 
-    recognition.onresult = (event) => {
+        recognition.onresult = (event) => {
         let transcript = '';
+        let isFinal = false;
+
         for (let i = event.resultIndex; i < event.results.length; i++) {
             transcript += event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                isFinal = true;
+            }
         }
+
         const placeholder = document.getElementById("speechPlaceholder");
         const speechText = document.getElementById("speechText");
-        const customInput = document.getElementById("customTextInput");
 
         if (placeholder) placeholder.style.display = "none";
         if (speechText) {
             speechText.style.display = "block";
             speechText.textContent = transcript;
         }
-        // 自由入力欄にも自動セット（手修正しやすくするため）
-// if (customInput) {
-//     customInput.value = transcript;
-// }
 
+        // ★ 音声認識が確定したタイミングで相手の発言（左側吹き出し）として追加
+        if (isFinal && transcript.trim() !== "") {
+            addChatMessage(transcript, 'left');
+        }
     };
+
+
+    
 
     recognition.onend = () => {
         if (isListening) {
