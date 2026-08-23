@@ -486,8 +486,8 @@ body.manage-mode .star-btn {
 /* 自分（カードタップ・手入力）：右側（トーンを落とした上品なマイルドグリーン） */
 .chat-bubble.right {
     align-self: flex-end;
-    background-color: #9fe870; /* 派手すぎない落ち着いたLINEグリーン */
-    color: #111111;
+    background-color: #4f46e5;
+    color: #ffffff; 
     border-top-right-radius: 4px;
 }
 
