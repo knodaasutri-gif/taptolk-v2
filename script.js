@@ -134,17 +134,19 @@ function toggleFavorite(cardId, event) {
     if (typeof triggerHaptic === 'function') triggerHaptic();
 
     let favorites = getFavorites();
-    const index = favorites.indexOf(cardId);
+    const targetId = String(cardId);
 
-    if (index > -1) {
-        favorites.splice(index, 1);
+    // ★を外した時はリストから完全に除外する
+    if (favorites.includes(targetId)) {
+        favorites = favorites.filter(id => String(id) !== targetId);
     } else {
-        favorites.push(cardId);
+        favorites.push(targetId);
     }
 
     localStorage.setItem("favoriteCards", JSON.stringify(favorites));
-    renderCards(); // 星の表示状態を即座に再描画
+    renderCards(); // 画面を更新して即座に反映
 }
+
 
 // --- カテゴリータブの描画（お気に入りタブを追加） ---
 function renderCategoryTabs() {
@@ -615,68 +617,3 @@ function clearDisplay() {
             }
         });
     }
-// --- お気に入り機能の実装（確定版） ---
-
-// お気に入りデータの取得
-function getFavorites() {
-    try {
-        const favs = localStorage.getItem("favoriteCards");
-        return favs ? JSON.parse(favs) : [];
-    } catch (e) {
-        return [];
-    }
-}
-
-// お気に入りの追加・削除
-function toggleFavorite(cardId, event) {
-    if (event) {
-        event.stopPropagation();
-        event.preventDefault();
-    }
-    if (typeof triggerHaptic === 'function') triggerHaptic();
-
-    let favorites = getFavorites();
-    const index = favorites.indexOf(cardId);
-
-    if (index > -1) {
-        favorites.splice(index, 1);
-    } else {
-        favorites.push(cardId);
-    }
-
-    localStorage.setItem("favoriteCards", JSON.stringify(favorites));
-    updateFavoriteUI();
-}
-
-// 全カードに星ボタンをセット＆状態の更新
-function updateFavoriteUI() {
-    const favorites = getFavorites();
-    const cards = document.querySelectorAll(".card, .phrase-card, .card-item, .leave-quick-btn");
-
-    cards.forEach(card => {
-        // カードのテキスト内容から識別IDを作成
-        let cardId = card.getAttribute("data-id") || card.innerText;
-        cardId = cardId.replace(/[★☆]/g, "").trim();
-        if (!cardId) return;
-
-        let starBtn = card.querySelector(".star-btn");
-        if (!starBtn) {
-            starBtn = document.createElement("button");
-            starBtn.className = "star-btn";
-            starBtn.type = "button";
-            card.appendChild(starBtn);
-        }
-
-        // クリックイベントの確実な登録
-        starBtn.onclick = (e) => toggleFavorite(cardId, e);
-
-        if (favorites.includes(cardId)) {
-            card.classList.add("is-favorite");
-            starBtn.innerText = "★";
-        } else {
-            card.classList.remove("is-favorite");
-            starBtn.innerText = "☆";
-        }
-    });
-}
-
