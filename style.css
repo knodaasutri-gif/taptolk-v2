@@ -449,12 +449,11 @@ body.manage-mode .star-btn {
     display: none !important;
 }
 
-/* --- スッキリ落ち着いたタイムライン表示 --- */
+/* --- アプリのトーンに馴染むLINE風タイムライン --- */
 .chat-timeline {
     width: 100%;
     height: 180px;
-    background-color: #f0f2f5; /* 落ち着いたライトグレー */
-    border: 1px solid #e0e0e0;  /* 控えめな枠線 */
+    background-color: #b2c7d9; /* LINEのデフォルトトークルーム背景に近い落ち着いたブルーグレー */
     border-radius: 12px;
     padding: 12px;
     overflow-y: auto;
@@ -463,6 +462,7 @@ body.manage-mode .star-btn {
     gap: 10px;
     margin-bottom: 8px;
     box-sizing: border-box;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); /* 少し立体感を出してリッチに */
 }
 
 .chat-bubble {
@@ -472,24 +472,23 @@ body.manage-mode .star-btn {
     font-size: 0.95rem;
     line-height: 1.4;
     word-break: break-all;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-/* 相手（音声入力など）：左側（白い吹き出し） */
+/* 相手（音声入力など）：左側（スッキリした白の吹き出し） */
 .chat-bubble.left {
     align-self: flex-start;
     background-color: #ffffff;
     color: #333333;
-    border: 1px solid #e0e0e0;
-    border-top-left-radius: 2px;
+    border-top-left-radius: 4px;
 }
 
-/* 自分（カードタップ・手入力）：右側（優しいパステルブルー） */
+/* 自分（カードタップ・手入力）：右側（トーンを落とした上品なマイルドグリーン） */
 .chat-bubble.right {
     align-self: flex-end;
-    background-color: #4a7cff; /* メインカラーに合わせた優しい青 */
-    color: #ffffff;
-    border-top-right-radius: 2px;
+    background-color: #9fe870; /* 派手すぎない落ち着いたLINEグリーン */
+    color: #111111;
+    border-top-right-radius: 4px;
 }
 
 /* タイムライン操作ボタン */
