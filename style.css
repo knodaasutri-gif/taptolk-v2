@@ -449,22 +449,50 @@ body.manage-mode .star-btn {
     display: none !important;
 }
 
-/* --- LINE風タイムライン表示のレイアウト修正 --- */
+/* --- スッキリ落ち着いたタイムライン表示 --- */
 .chat-timeline {
-    width: 100%;             /* 横幅いっぱいに広げる */
-    height: 180px;           /* 高さを固定 */
-    background-color: #7494c0; 
+    width: 100%;
+    height: 180px;
+    background-color: #f0f2f5; /* 落ち着いたライトグレー */
+    border: 1px solid #e0e0e0;  /* 控えめな枠線 */
     border-radius: 12px;
     padding: 12px;
-    overflow-y: auto;        /* 縦スクロールを有効化 */
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin-bottom: 8px;
-    box-sizing: border-box;  /* パディングを含めて幅を計算 */
+    box-sizing: border-box;
 }
 
-/* タイムライン操作ボタンのレイアウト調整 */
+.chat-bubble {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    word-break: break-all;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* 相手（音声入力など）：左側（白い吹き出し） */
+.chat-bubble.left {
+    align-self: flex-start;
+    background-color: #ffffff;
+    color: #333333;
+    border: 1px solid #e0e0e0;
+    border-top-left-radius: 2px;
+}
+
+/* 自分（カードタップ・手入力）：右側（優しいパステルブルー） */
+.chat-bubble.right {
+    align-self: flex-end;
+    background-color: #4a7cff; /* メインカラーに合わせた優しい青 */
+    color: #ffffff;
+    border-top-right-radius: 2px;
+}
+
+/* タイムライン操作ボタン */
 .timeline-controls {
     display: flex;
     justify-content: space-between;
@@ -474,12 +502,12 @@ body.manage-mode .star-btn {
 }
 
 .clear-btn, .stop-btn {
-    padding: 8px 16px;
+    padding: 6px 14px;
     border-radius: 6px;
     border: none;
     font-weight: bold;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .clear-btn {
