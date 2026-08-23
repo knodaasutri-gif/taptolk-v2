@@ -1,3 +1,18 @@
+// --- 単語置換辞書（ここによくある誤字や変換したい単語を登録） ---
+const wordDictionary = {
+    "ジェミニ": "Gemini",
+    "ジェミニー": "Gemini",
+    // 必要に応じてここに追加していきます
+};
+
+// 単語を置換する関数
+function applyCustomDictionary(text) {
+    let resultText = text;
+    for (const [key, value] of Object.entries(wordDictionary)) {
+        resultText = resultText.replaceAll(key, value);
+    }
+    return resultText;
+    
 const defaultCategories = [
     {
         id: "work",
