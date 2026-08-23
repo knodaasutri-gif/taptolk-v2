@@ -371,7 +371,7 @@ function initSpeechRecognition() {
         // 最新の確定結果だけを取得する
         const lastResultIndex = event.results.length - 1;
         const lastResult = event.results[lastResultIndex];
-        const transcript = lastResult[0].transcript.trim();
+         let  transcript = lastResult[0].transcript.trim();
 
         transcript = applyCustomDictionary(transcript);
 
