@@ -12,7 +12,7 @@ function applyCustomDictionary(text) {
         resultText = resultText.replaceAll(key, value);
     }
     return resultText;
-    
+}
 const defaultCategories = [
     {
         id: "work",
