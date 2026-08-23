@@ -353,15 +353,10 @@ function initSpeechRecognition() {
     recognition.interimResults = true;
 
         recognition.onresult = (event) => {
-        let transcript = '';
-        let isFinal = false;
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-                isFinal = true;
-            }
-        }
+        // 最新の確定結果だけを取得する
+        const lastResultIndex = event.results.length - 1;
+        const lastResult = event.results[lastResultIndex];
+        const transcript = lastResult[0].transcript.trim();
 
         const placeholder = document.getElementById("speechPlaceholder");
         const speechText = document.getElementById("speechText");
@@ -372,11 +367,18 @@ function initSpeechRecognition() {
             speechText.textContent = transcript;
         }
 
-        // ★ 音声認識が確定したタイミングで相手の発言（左側吹き出し）として追加
-        if (isFinal && transcript.trim() !== "") {
-            addChatMessage(transcript, 'left');
+        // 確定した結果（isFinal）かつ、直前と同じ文字でなければ追加
+        if (lastResult.isFinal && transcript !== "") {
+            // タイムラインの最後の吹き出しと同じテキストなら追加しない（重複防止）
+            const timeline = document.getElementById("chatTimeline");
+            const lastBubble = timeline ? timeline.lastElementChild : null;
+
+            if (!lastBubble || lastBubble.textContent !== transcript) {
+                addChatMessage(transcript, 'left');
+            }
         }
     };
+
 
 
     
