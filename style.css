@@ -429,3 +429,22 @@ button:active {
 .is-favorite {
     border: 2px solid #f59e0b !important;
 }
+/* --- 星ボタンと削除ボタンの重なり防止 --- */
+
+/* 星ボタンを左上に移動 */
+.star-btn {
+    left: 8px !important;
+    right: auto !important;
+}
+
+/* 削除ボタン（✕）は右上に配置 */
+.delete-card-btn {
+    right: 8px !important;
+    left: auto !important;
+    z-index: 20 !important;
+}
+
+/* 削除モード（管理モード）のときは星ボタンを非表示にする */
+body.manage-mode .star-btn {
+    display: none !important;
+}
