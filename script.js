@@ -373,6 +373,8 @@ function initSpeechRecognition() {
         const lastResult = event.results[lastResultIndex];
         const transcript = lastResult[0].transcript.trim();
 
+        transcript = applyCustomDictionary(transcript);
+
         const placeholder = document.getElementById("speechPlaceholder");
         const speechText = document.getElementById("speechText");
 
