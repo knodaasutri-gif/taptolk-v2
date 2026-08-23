@@ -448,3 +448,67 @@ button:active {
 body.manage-mode .star-btn {
     display: none !important;
 }
+
+/* --- LINE風タイムライン表示 --- */
+.chat-timeline {
+    height: 200px;
+    background-color: #7494c0; /* LINE風の背景色 */
+    border-radius: 12px;
+    padding: 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.chat-bubble {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    word-break: break-all;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* 相手（音声入力など）：左側 */
+.chat-bubble.left {
+    align-self: flex-start;
+    background-color: #ffffff;
+    color: #333333;
+    border-top-left-radius: 2px;
+}
+
+/* 自分（カードタップ・手入力）：右側 */
+.chat-bubble.right {
+    align-self: flex-end;
+    background-color: #85e249; /* LINEグリーン */
+    color: #000000;
+    border-top-right-radius: 2px;
+}
+
+/* タイムライン用操作ボタン */
+.timeline-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.clear-btn, .stop-btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.clear-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+.stop-btn {
+    background-color: #dc3545;
+    color: white;
+}
