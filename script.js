@@ -427,16 +427,30 @@ function toggleManageMode() {
 }
 
 function deleteCard(event, cardId) {
-    event.stopPropagation();
-    triggerHaptic();
-    const currentCat = appData.find(c => c.id === currentCategoryId);
-    if (currentCat) {
-        currentCat.cards = currentCat.cards.filter(c => c.id !== cardId);
-        saveData();
-        renderCards();
-        showToast("カードを削除しました");
+    if (event) {
+        event.stopPropagation(); // 星ボタンやカードタップへの連鎖をブロック
+        event.preventDefault();
     }
+    if (typeof triggerHaptic === 'function') triggerHaptic();
+
+    if (!confirm("このカードを削除しますか？")) return;
+
+    // 全カテゴリーから対象カードを削除
+    appData.forEach(cat => {
+        if (cat.cards) {
+            cat.cards = cat.cards.filter(c => String(c.id) !== String(cardId));
+        }
+    });
+
+    // お気に入りリストからも該当IDを確実に削除
+    let favorites = getFavorites();
+    favorites = favorites.filter(id => String(id) !== String(cardId));
+    localStorage.setItem("favoriteCards", JSON.stringify(favorites));
+
+    saveData();
+    renderCards();
 }
+
 
 function openAddModal() {
     triggerHaptic();
