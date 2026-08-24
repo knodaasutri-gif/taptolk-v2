@@ -34,6 +34,7 @@
             <button class="action-btn text-btn" onclick="toggleTextInput()">✏️ 自由入力</button>
             <button class="action-btn add-btn" onclick="openAddModal()">➕ カード作成</button>
             <button class="action-btn manage-btn" id="manageBtn" onclick="toggleManageMode()">⚙️ 編集</button>
+            <button class="action-btn dict-btn" onclick="openDictModal()">📖 辞書</button>
         </div>
 
         <!-- カテゴリータブ -->
@@ -92,6 +93,37 @@
             <div class="modal-btns">
                 <button class="modal-btn cancel" onclick="closeAddModal()">キャンセル</button>
                 <button class="modal-btn save" onclick="saveNewCard()">追加</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="dictModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">単語置き換え辞書</div>
+            
+            <div class="form-group">
+                <label>読み・誤字（変換前）</label>
+                <input type="text" id="dictKey" placeholder="例: じぇみに">
+            </div>
+            <div class="form-group">
+                <label>正しく表示したい文字（変換後）</label>
+                <input type="text" id="dictValue" placeholder="例: Gemini">
+            </div>
+            <div class="modal-btns">
+                <button class="modal-btn save" onclick="saveDictWord()" style="width: 100%;">登録</button>
+            </div>
+            
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #cbd5e1;">
+            
+            <div class="form-group">
+                <label>登録済みリスト</label>
+                <div id="dictList" class="dict-list">
+                    <!-- ここに登録済みの単語リストが表示されます -->
+                </div>
+            </div>
+
+            <div class="modal-btns">
+                <button class="modal-btn cancel" onclick="closeDictModal()" style="width: 100%; margin-top: 5px;">閉じる</button>
             </div>
         </div>
     </div>
