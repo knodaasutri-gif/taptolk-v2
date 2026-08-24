@@ -797,3 +797,14 @@ function applyDictionaryReplacement(text) {
     
     return replacedText;
 }
+
+// HTMLエスケープ関数（安全対策）
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
