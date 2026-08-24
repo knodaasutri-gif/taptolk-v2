@@ -372,6 +372,7 @@ function initSpeechRecognition() {
         const lastResultIndex = event.results.length - 1;
         const lastResult = event.results[lastResultIndex];
          let  transcript = lastResult[0].transcript.trim();
+         transcript = applyDictionaryReplacement(transcript);   
 
         transcript = applyCustomDictionary(transcript);
 
@@ -705,4 +706,94 @@ function clearTimeline() {
     if (timeline) {
         timeline.innerHTML = '<div class="chat-bubble left">ここに音声やカードの文字が表示されます</div>';
     }
+}
+
+/* ===================================================
+   単語置き換え辞書機能
+   =================================================== */
+
+// 1. 辞書データの保持と読み込み
+let wordDictionary = JSON.parse(localStorage.getItem('wordDictionary')) || {};
+
+// 辞書モーダルを開く
+function openDictModal() {
+    renderDictList();
+    document.getElementById('dictModal').style.display = 'flex';
+}
+
+// 辞書モーダルを閉じる
+function closeDictModal() {
+    document.getElementById('dictModal').style.display = 'none';
+    document.getElementById('dictKey').value = '';
+    document.getElementById('dictValue').value = '';
+}
+
+// 単語を登録する
+function saveDictWord() {
+    const key = document.getElementById('dictKey').value.trim();
+    const value = document.getElementById('dictValue').value.trim();
+
+    if (!key || !value) {
+        showToast("変換前と変換後の両方を入力してください");
+        return;
+    }
+
+    // 辞書データに追加して保存
+    wordDictionary[key] = value;
+    localStorage.setItem('wordDictionary', JSON.stringify(wordDictionary));
+
+    // 入力欄をクリアして再描画
+    document.getElementById('dictKey').value = '';
+    document.getElementById('dictValue').value = '';
+    renderDictList();
+    showToast(`「${key}」→「${value}」を登録しました`);
+}
+
+// 登録されている単語を削除する
+function deleteDictWord(key) {
+    delete wordDictionary[key];
+    localStorage.setItem('wordDictionary', JSON.stringify(wordDictionary));
+    renderDictList();
+    showToast(`「${key}」を削除しました`);
+}
+
+// 辞書一覧の表示を更新する
+function renderDictList() {
+    const listContainer = document.getElementById('dictList');
+    if (!listContainer) return;
+
+    const keys = Object.keys(wordDictionary);
+    if (keys.length === 0) {
+        listContainer.innerHTML = '<div style="color: #64748b; font-size: 0.85rem; text-align: center; padding: 10px;">登録された単語はありません</div>';
+        return;
+    }
+
+    let html = '';
+    keys.forEach(key => {
+        html += `
+            <div class="dict-item">
+                <span><strong>${escapeHTML(key)}</strong> ➔ ${escapeHTML(wordDictionary[key])}</span>
+                <button class="dict-delete-btn" onclick="deleteDictWord('${escapeHTML(key)}')">削除</button>
+            </div>
+        `;
+    });
+    listContainer.innerHTML = html;
+}
+
+// 2. 音声認識で取得したテキストを辞書に基づいて置き換える関数
+function applyDictionaryReplacement(text) {
+    if (!text) return text;
+    let replacedText = text;
+    
+    // 辞書に登録された全てのキー（変換前）で置換を実行
+    Object.keys(wordDictionary).forEach(key => {
+        if (key) {
+            // エスケープ処理を行って安全に正規表現化し、一括置換
+            const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(escapedKey, 'g');
+            replacedText = replacedText.replace(regex, wordDictionary[key]);
+        }
+    });
+    
+    return replacedText;
 }
