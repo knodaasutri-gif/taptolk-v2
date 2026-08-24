@@ -94,7 +94,7 @@ body {
 
 .action-bar {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 8px;
 }
 
@@ -517,4 +517,47 @@ body.manage-mode .star-btn {
 .stop-btn {
     background-color: #dc3545;
     color: white;
+}
+
+/* --- 辞書機能用スタイル --- */
+
+/* 辞書ボタンのカラー */
+.dict-btn { 
+    background: #f59e0b; 
+    color: white; 
+}
+
+/* 辞書リストの表示枠 */
+.dict-list {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px;
+    background: #f8fafc;
+}
+
+/* 登録された単語の1行表示 */
+.dict-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed #cbd5e1;
+    font-size: 0.9rem;
+}
+
+.dict-item:last-child {
+    border-bottom: none;
+}
+
+/* 辞書リストの削除ボタン */
+.dict-delete-btn {
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
 }
