@@ -701,7 +701,7 @@ function clearTimeline() {
    =================================================== */
 
 // 1. 辞書データの保持と読み込み
-var wordDictionary = JSON.parse(localStorage.getItem('wordDictionary')) || {};
+ wordDictionary = JSON.parse(localStorage.getItem('wordDictionary')) || {};
 
 // 辞書モーダルを開く
 function openDictModal() {
