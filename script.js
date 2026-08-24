@@ -664,19 +664,7 @@ function clearDisplay() {
         speechPlaceholder.style.display = "inline";
     }
 }
-    const favorites = getFavorites();
-    const cards = document.querySelectorAll(".card, .phrase-card, .card-item");
-
-    if (category === 'favorite') {
-        cards.forEach(card => {
-            const cardId = card.getAttribute("data-id") || card.innerText.replace("★", "").replace("☆", "").trim();
-            if (favorites.includes(cardId)) {
-                card.style.display = "";
-            } else {
-                card.style.display = "none";
-            }
-        });
-    }
+    
 
 // --- タイムライン制御用関数 ---
 
