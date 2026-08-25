@@ -796,3 +796,56 @@ function escapeHTML(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
+
+// 1. Firebaseの設定（★ご自身の本物の値に書き換えてください）
+const firebaseConfig = {
+  apiKey: AIzaSyANns7matOmXCBZ-E6gcRvd-WNqKB11Qt8",
+  authDomain: "taptalk-auth.firebaseapp.com",
+  projectId: "taptalk-auth",
+  storageBucket: "taptalk-auth.firebasestorage.app",
+  messagingSenderId: "398376439382",
+  appId: "1:398376439382:web:19d06329cb78b7a138f5f7"
+};
+
+// 2. 許可するGoogleメールアドレス（★ご自身のGmailアドレスに書き換えてください）
+const ALLOWED_EMAIL = "k.noda.asutri@gmail.com";
+
+// Firebaseの初期化
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+// 要素の取得
+const loginContainer = document.getElementById("login-container");
+const appContainer = document.getElementById("app-container");
+const loginBtn = document.getElementById("login-btn");
+const errorMessage = document.getElementById("error-message");
+
+// ログインボタンを押したときの処理
+loginBtn.addEventListener("click", () => {
+  auth.signInWithPopup(provider).catch((error) => {
+    errorMessage.textContent = "ログインエラー: " + error.message;
+  });
+});
+
+// ログイン状態の監視
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    if (user.email === ALLOWED_EMAIL) {
+      // 許可されたユーザーの場合：ログイン画面を隠してアプリ画面を表示
+      loginContainer.style.display = "none";
+      appContainer.style.display = "block";
+    } else {
+      // 許可されていないユーザーの場合：ログアウトさせてエラー表示
+      auth.signOut();
+      errorMessage.textContent = "アクセス権限がありません（許可されていないアカウントです）。";
+      loginContainer.style.display = "block";
+      appContainer.style.display = "none";
+    }
+  } else {
+    // 未ログイン状態の場合：ログイン画面を表示してアプリ画面を隠す
+    loginContainer.style.display = "block";
+    appContainer.style.display = "none";
+  }
+});
+
