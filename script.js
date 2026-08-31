@@ -70,6 +70,8 @@ let appData = [];
 let currentCategoryId = "work";
 let isManageMode = false;
 let isListening = false;
+let isStarting = false;
+let recognitionRestartTimer = null;
 let recognition = null;
 const synth = window.speechSynthesis;
 let audioCtx = null;
@@ -426,6 +428,11 @@ function initSpeechRecognition() {
 
     recognition.onerror = (event) => {
         // エラーの後に onend が発火しても再起動しないよう、先に状態を解除する。
+        if (recognitionRestartTimer !== null) {
+            clearTimeout(recognitionRestartTimer);
+            recognitionRestartTimer = null;
+        }
+        isStarting = false;
         resetListeningState();
         reportRecognitionError(event.error);
     };
@@ -436,13 +443,30 @@ function initSpeechRecognition() {
             return;
         }
 
-        try {
-            recognition.start();
-        } catch (error) {
-            console.error("SpeechRecognition restart failed:", error);
-            resetListeningState();
-            showToast("音声認識を再開できませんでした。もう一度お試しください。");
-        }
+        // onend 直後の start() は InvalidStateError になることがあるため、少し待って再開する。
+        if (isStarting || recognitionRestartTimer !== null) return;
+
+        isStarting = true;
+        recognitionRestartTimer = setTimeout(() => {
+            recognitionRestartTimer = null;
+
+            // 待機中にユーザーが停止した場合は、再開しない。
+            if (!isListening) {
+                isStarting = false;
+                resetListeningState();
+                return;
+            }
+
+            try {
+                recognition.start();
+            } catch (error) {
+                console.error("SpeechRecognition restart failed:", error);
+                resetListeningState();
+                showToast("音声認識を再開できませんでした。もう一度お試しください。");
+            } finally {
+                isStarting = false;
+            }
+        }, 400);
     };
 }
 
@@ -453,8 +477,13 @@ function toggleSpeechRecognition() {
     }
     triggerHaptic();
     const micBtn = document.getElementById("micBtn");
-    if (isListening) {
+    if (isListening || isStarting) {
         isListening = false;
+        isStarting = false;
+        if (recognitionRestartTimer !== null) {
+            clearTimeout(recognitionRestartTimer);
+            recognitionRestartTimer = null;
+        }
         try {
             recognition.stop();
         } catch (error) {
@@ -467,8 +496,11 @@ function toggleSpeechRecognition() {
         showToast("音声入力をオフにしました");
     } else {
         try {
+            if (isStarting) return;
+            isStarting = true;
             isListening = true;
             recognition.start();
+            isStarting = false;
             // 自由入力欄をクリアする
 const customInput = document.getElementById("customTextInput");
 if (customInput) customInput.value = "";
@@ -481,6 +513,7 @@ if (customInput) customInput.value = "";
         } catch (error) {
             console.error("SpeechRecognition start failed:", error);
             isListening = false;
+            isStarting = false;
             if (micBtn) {
                 micBtn.classList.remove("listening");
                 micBtn.textContent = "🎤 音声入力";
