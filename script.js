@@ -367,6 +367,29 @@ function initSpeechRecognition() {
     recognition.continuous = true;
     recognition.interimResults = true;
 
+    const resetListeningState = () => {
+        isListening = false;
+        const micBtn = document.getElementById("micBtn");
+        if (micBtn) {
+            micBtn.classList.remove("listening");
+            micBtn.textContent = "🎤 音声入力";
+        }
+    };
+
+    const reportRecognitionError = (error) => {
+        const messages = {
+            "not-allowed": "マイクの使用が許可されていません。ブラウザの権限設定を確認してください。",
+            "service-not-allowed": "このブラウザでは音声認識サービスを利用できません。",
+            "network": "音声認識の通信エラーが発生しました。ネットワーク接続を確認してください。",
+            "no-speech": "音声を検出できませんでした。",
+            "audio-capture": "マイクを利用できません。接続・設定を確認してください。",
+            "aborted": "音声認識が中断されました。"
+        };
+        const message = messages[error] || `音声認識エラーが発生しました（${error || "unknown"}）。`;
+        console.error("SpeechRecognition error:", error, message);
+        showToast(message);
+    };
+
         recognition.onresult = (event) => {
         // 最新の確定結果だけを取得する
         const lastResultIndex = event.results.length - 1;
@@ -401,17 +424,24 @@ function initSpeechRecognition() {
 
     
 
+    recognition.onerror = (event) => {
+        // エラーの後に onend が発火しても再起動しないよう、先に状態を解除する。
+        resetListeningState();
+        reportRecognitionError(event.error);
+    };
+
     recognition.onend = () => {
-        if (isListening) {
-            try {
-                recognition.start();
-            } catch (e) {}
-        } else {
-            const micBtn = document.getElementById("micBtn");
-            if (micBtn) {
-                micBtn.classList.remove("listening");
-                micBtn.textContent = "🎤 音声入力";
-            }
+        if (!isListening) {
+            resetListeningState();
+            return;
+        }
+
+        try {
+            recognition.start();
+        } catch (error) {
+            console.error("SpeechRecognition restart failed:", error);
+            resetListeningState();
+            showToast("音声認識を再開できませんでした。もう一度お試しください。");
         }
     };
 }
@@ -425,7 +455,11 @@ function toggleSpeechRecognition() {
     const micBtn = document.getElementById("micBtn");
     if (isListening) {
         isListening = false;
-        recognition.stop();
+        try {
+            recognition.stop();
+        } catch (error) {
+            console.warn("SpeechRecognition stop failed:", error);
+        }
         if (micBtn) {
             micBtn.classList.remove("listening");
             micBtn.textContent = "🎤 音声入力";
@@ -444,7 +478,15 @@ if (customInput) customInput.value = "";
                 micBtn.textContent = "🛑 聞き取り中…";
             }
             showToast("音声入力をオンにしました（連続認識）");
-        } catch (e) {}
+        } catch (error) {
+            console.error("SpeechRecognition start failed:", error);
+            isListening = false;
+            if (micBtn) {
+                micBtn.classList.remove("listening");
+                micBtn.textContent = "🎤 音声入力";
+            }
+            showToast("音声入力を開始できませんでした。マイクの権限を確認してください。");
+        }
     }
 }
 
