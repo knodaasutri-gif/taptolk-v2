@@ -301,16 +301,6 @@ function speakText(text) {
     // ★ タイムラインに自分の発言（右側吹き出し）を追加
     addChatMessage(text, 'right');
 
-    const placeholder = document.getElementById("speechPlaceholder");
-    const speechText = document.getElementById("speechText");
-    if (placeholder) placeholder.style.display = "none";
-    if (speechText) {
-        speechText.style.display = "block";
-        speechText.textContent = text;
-    }
-    playTapChime();
-    // ...略...
-
     playTapChime();
     if (synth) {
         synth.cancel();
@@ -400,15 +390,6 @@ function initSpeechRecognition() {
          transcript = applyDictionaryReplacement(transcript);   
 
         transcript = applyCustomDictionary(transcript);
-
-        const placeholder = document.getElementById("speechPlaceholder");
-        const speechText = document.getElementById("speechText");
-
-        if (placeholder) placeholder.style.display = "none";
-        if (speechText) {
-            speechText.style.display = "block";
-            speechText.textContent = transcript;
-        }
 
         // 確定した結果（isFinal）かつ、直前と同じ文字でなければ追加
         if (lastResult.isFinal && transcript !== "") {
@@ -668,49 +649,7 @@ function generateLeaveCard(typeText, icon, includeTime) {
 }
 
 window.onload = initApp;
-// 日付ボタンの処理
-function setQuickDate(addDays) {
-    if (typeof triggerHaptic === 'function') {
-        triggerHaptic();
-    }
-    const d = new Date();
-    d.setDate(d.getDate() + addDays);
-    const leaveDateInput = document.getElementById("leaveDateInput");
-    if (leaveDateInput) {
-        leaveDateInput.value = d.toISOString().split('T')[0];
-    }
 
-    const btns = document.querySelectorAll(".quick-date-btns button");
-    btns.forEach((btn, index) => {
-        if (index === addDays) {
-            btn.classList.add("active-date");
-        } else {
-            btn.classList.remove("active-date");
-        }
-    });
-}
-
-// 表示エリアの文字をクリアする処理
-function clearDisplay() {
-    const speechText = document.getElementById("speechText");
-    const speechPlaceholder = document.getElementById("speechPlaceholder");
-    
-    // 読み上げ中の音声があれば停止
-    if (typeof stopSpeech === 'function') {
-        stopSpeech();
-    }
-    
-    // 表示テキストを消去
-    if (speechText) {
-        speechText.innerText = "";
-        speechText.style.display = "none";
-    }
-    
-    // プレースホルダー（案内文）を再表示
-    if (speechPlaceholder) {
-        speechPlaceholder.style.display = "inline";
-    }
-}
 // 自由入力欄のクリア処理（触感追加）
 function clearCustomInput() {
     if (typeof triggerHaptic === 'function') triggerHaptic();
@@ -719,27 +658,6 @@ function clearCustomInput() {
         input.value = "";
     }
 }
-
-// 表示エリアのクリア処理（触感追加）
-function clearDisplay() {
-    if (typeof triggerHaptic === 'function') triggerHaptic();
-    const speechText = document.getElementById("speechText");
-    const speechPlaceholder = document.getElementById("speechPlaceholder");
-    
-    if (typeof stopSpeech === 'function') {
-        stopSpeech();
-    }
-    
-    if (speechText) {
-        speechText.innerText = "";
-        speechText.style.display = "none";
-    }
-    
-    if (speechPlaceholder) {
-        speechPlaceholder.style.display = "inline";
-    }
-}
-    
 
 // --- タイムライン制御用関数 ---
 
