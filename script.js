@@ -175,19 +175,19 @@ function toggleFavorite(cardId, event) {
 function renderCategoryTabs() {
     const tabsContainer = document.getElementById("categoryTabs");
     if (!tabsContainer) return;
-    tabsContainer.innerHTML = "";
+    tabsContainer.replaceChildren();
 
     // 通常のカテゴリータブを生成
     appData.forEach(cat => {
         const btn = document.createElement("button");
         btn.className = `tab-btn ${cat.id === currentCategoryId ? 'active' : ''}`;
         btn.textContent = cat.name;
-        btn.onclick = () => {
+        btn.addEventListener("click", () => {
             triggerHaptic();
             currentCategoryId = cat.id;
             renderCategoryTabs();
             renderCards();
-        };
+        });
         tabsContainer.appendChild(btn);
     });
 
@@ -195,12 +195,12 @@ function renderCategoryTabs() {
     const favBtn = document.createElement("button");
     favBtn.className = `tab-btn ${currentCategoryId === 'favorite' ? 'active' : ''}`;
     favBtn.textContent = "⭐ お気に入り";
-    favBtn.onclick = () => {
+    favBtn.addEventListener("click", () => {
         triggerHaptic();
         currentCategoryId = 'favorite';
         renderCategoryTabs();
         renderCards();
-    };
+    });
     tabsContainer.appendChild(favBtn);
 }
 
@@ -209,7 +209,7 @@ function renderCards() {
     const grid = document.getElementById("cardsGrid");
     const calSection = document.getElementById("calendarSection");
     if (!grid) return;
-    grid.innerHTML = "";
+    grid.replaceChildren();
 
     if (calSection) {
         calSection.style.display = (currentCategoryId === "leave") ? "block" : "none";
@@ -244,7 +244,10 @@ function renderCards() {
     if (cardsToRender.length === 0) {
         if (currentCategoryId !== "leave") {
             const emptyMsg = currentCategoryId === 'favorite' ? 'お気に入り登録されたカードがありません' : 'カードがありません';
-            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">${emptyMsg}</div>`;
+            const emptyEl = document.createElement("div");
+            emptyEl.style.cssText = "grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;";
+            emptyEl.textContent = emptyMsg;
+            grid.appendChild(emptyEl);
         }
         return;
     }
@@ -257,25 +260,36 @@ function renderCards() {
         
         cardEl.className = `card ${isFav ? 'is-favorite' : ''}`;
 
-        cardEl.innerHTML = `
-            <button class="star-btn" type="button">${isFav ? '★' : '☆'}</button>
-            <button class="delete-card-btn" onclick="deleteCard(event, '${card.id}')">✕</button>
-            <div class="card-icon">${card.icon}</div>
-            <div class="card-text">${card.text}</div>
-        `;
+        const starBtn = document.createElement("button");
+        starBtn.className = "star-btn";
+        starBtn.type = "button";
+        starBtn.textContent = isFav ? "★" : "☆";
+        starBtn.setAttribute("aria-label", isFav ? "お気に入りから削除" : "お気に入りに追加");
+        starBtn.addEventListener("click", (e) => toggleFavorite(cardId, e));
 
-        // 星ボタンクリック
-        const starBtn = cardEl.querySelector(".star-btn");
-        if (starBtn) {
-            starBtn.onclick = (e) => toggleFavorite(cardId, e);
-        }
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete-card-btn";
+        deleteBtn.type = "button";
+        deleteBtn.textContent = "✕";
+        deleteBtn.setAttribute("aria-label", "カードを削除");
+        deleteBtn.addEventListener("click", (e) => deleteCard(e, card.id));
+
+        const iconEl = document.createElement("div");
+        iconEl.className = "card-icon";
+        iconEl.textContent = card.icon || "";
+
+        const textEl = document.createElement("div");
+        textEl.className = "card-text";
+        textEl.textContent = card.text || "";
+
+        cardEl.append(starBtn, deleteBtn, iconEl, textEl);
 
         // カード本体クリック
-        cardEl.onclick = () => {
+        cardEl.addEventListener("click", () => {
             if (isManageMode) return;
             triggerHaptic();
             speakText(card.text);
-        };
+        });
 
         grid.appendChild(cardEl);
     });
@@ -555,7 +569,7 @@ function closeAddModal() {
 function populateModalCategories() {
     const select = document.getElementById("modalCategory");
     if (!select) return;
-    select.innerHTML = "";
+    select.replaceChildren();
     appData.forEach(cat => {
         const opt = document.createElement("option");
         opt.value = cat.id;
@@ -668,7 +682,7 @@ function addChatMessage(text, sender = 'right') {
 
     // 初期の案内メッセージがあればクリア
     if (timeline.children.length === 1 && timeline.children[0].innerText.includes("表示されます")) {
-        timeline.innerHTML = "";
+        timeline.replaceChildren();
     }
 
     const bubble = document.createElement("div");
@@ -685,7 +699,10 @@ function addChatMessage(text, sender = 'right') {
 function clearTimeline() {
     const timeline = document.getElementById("chatTimeline");
     if (timeline) {
-        timeline.innerHTML = '<div class="chat-bubble left">ここに音声やカードの文字が表示されます</div>';
+        const placeholder = document.createElement("div");
+        placeholder.className = "chat-bubble left";
+        placeholder.textContent = "ここに音声やカードの文字が表示されます";
+        timeline.replaceChildren(placeholder);
     }
 }
 
@@ -745,20 +762,31 @@ function renderDictList() {
 
     const keys = Object.keys(wordDictionary);
     if (keys.length === 0) {
-        listContainer.innerHTML = '<div style="color: #64748b; font-size: 0.85rem; text-align: center; padding: 10px;">登録された単語はありません</div>';
+        const emptyEl = document.createElement("div");
+        emptyEl.style.cssText = "color: #64748b; font-size: 0.85rem; text-align: center; padding: 10px;";
+        emptyEl.textContent = "登録された単語はありません";
+        listContainer.replaceChildren(emptyEl);
         return;
     }
 
-    let html = '';
     keys.forEach(key => {
-        html += `
-            <div class="dict-item">
-                <span><strong>${escapeHTML(key)}</strong> ➔ ${escapeHTML(wordDictionary[key])}</span>
-                <button class="dict-delete-btn" onclick="deleteDictWord('${escapeHTML(key)}')">削除</button>
-            </div>
-        `;
+        const item = document.createElement("div");
+        item.className = "dict-item";
+
+        const label = document.createElement("span");
+        const keyEl = document.createElement("strong");
+        keyEl.textContent = key;
+        label.append(keyEl, document.createTextNode(" ➔ "), document.createTextNode(wordDictionary[key]));
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "dict-delete-btn";
+        deleteBtn.type = "button";
+        deleteBtn.textContent = "削除";
+        deleteBtn.addEventListener("click", () => deleteDictWord(key));
+
+        item.append(label, deleteBtn);
+        listContainer.appendChild(item);
     });
-    listContainer.innerHTML = html;
 }
 
 // 2. 音声認識で取得したテキストを辞書に基づいて置き換える関数
@@ -780,13 +808,4 @@ function applyDictionaryReplacement(text) {
 }
 
 // HTMLエスケープ関数（安全対策）
-function escapeHTML(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
 
