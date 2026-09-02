@@ -5,14 +5,6 @@ const wordDictionary = {
     // 必要に応じてここに追加していきます
 };
 
-// 単語を置換する関数
-function applyCustomDictionary(text) {
-    let resultText = text;
-    for (const [key, value] of Object.entries(wordDictionary)) {
-        resultText = resultText.replaceAll(key, value);
-    }
-    return resultText;
-}
 const defaultCategories = [
     {
         id: "work",
@@ -96,7 +88,7 @@ function playTapChime() {
         gain.connect(audioCtx.destination);
         osc.start(now);
         osc.stop(now + 0.11);
-    } catch (e) {}
+    } catch (e) { }
 }
 
 function showToast(msg) {
@@ -133,7 +125,7 @@ function saveData() {
     localStorage.setItem("taptalk_pixel_v1", JSON.stringify(appData));
 }
 
- // --- お気に入りデータの取得と保存（安全取得版） ---
+// --- お気に入りデータの取得と保存（安全取得版） ---
 function getFavorites() {
     try {
         const favs = localStorage.getItem("favoriteCards");
@@ -257,7 +249,7 @@ function renderCards() {
         const cardEl = document.createElement("div");
         const cardId = String(card.id || card.text).trim();
         const isFav = favorites.includes(cardId);
-        
+
         cardEl.className = `card ${isFav ? 'is-favorite' : ''}`;
 
         const starBtn = document.createElement("button");
@@ -296,15 +288,15 @@ function renderCards() {
 }
 
 
-            
 
 
-    
+
+
 
 function speakText(text) {
     if (isListening && recognition) {
         isListening = false;
-        try { recognition.stop(); } catch (e) {}
+        try { recognition.stop(); } catch (e) { }
         const micBtn = document.getElementById("micBtn");
         if (micBtn) {
             micBtn.classList.remove("listening");
@@ -396,14 +388,12 @@ function initSpeechRecognition() {
         showToast(message);
     };
 
-        recognition.onresult = (event) => {
+    recognition.onresult = (event) => {
         // 最新の確定結果だけを取得する
         const lastResultIndex = event.results.length - 1;
         const lastResult = event.results[lastResultIndex];
-         let  transcript = lastResult[0].transcript.trim();
-         transcript = applyDictionaryReplacement(transcript);   
-
-        transcript = applyCustomDictionary(transcript);
+        let transcript = lastResult[0].transcript.trim();
+        transcript = applyDictionaryReplacement(transcript);
 
         // 確定した結果（isFinal）かつ、直前と同じ文字でなければ追加
         if (lastResult.isFinal && transcript !== "") {
@@ -419,7 +409,7 @@ function initSpeechRecognition() {
 
 
 
-    
+
 
     recognition.onerror = (event) => {
         // エラーの後に onend が発火しても再起動しないよう、先に状態を解除する。
@@ -497,8 +487,8 @@ function toggleSpeechRecognition() {
             recognition.start();
             isStarting = false;
             // 自由入力欄をクリアする
-const customInput = document.getElementById("customTextInput");
-if (customInput) customInput.value = "";
+            const customInput = document.getElementById("customTextInput");
+            if (customInput) customInput.value = "";
 
             if (micBtn) {
                 micBtn.classList.add("listening");
@@ -643,7 +633,7 @@ function generateLeaveCard(typeText, icon, includeTime) {
     const dateObj = new Date(dateInput.value);
     const days = ['日', '月', '火', '水', '木', '金', '土'];
     const dateStr = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日（${days[dateObj.getDay()]}）`;
-    
+
     let timeStr = "";
     if (includeTime && timeInput && timeInput.value) {
         timeStr = formatTimeText(timeInput.value) + " ";
@@ -711,7 +701,18 @@ function clearTimeline() {
    =================================================== */
 
 // 1. 辞書データの保持と読み込み
-Object.assign(wordDictionary, JSON.parse(localStorage.getItem('wordDictionary') || '{}'));
+try {
+    const savedDictionary = JSON.parse(localStorage.getItem('wordDictionary') || '{}');
+    if (savedDictionary && typeof savedDictionary === 'object' && !Array.isArray(savedDictionary)) {
+        Object.entries(savedDictionary).forEach(([key, value]) => {
+            if (typeof key === 'string' && key.trim() && typeof value === 'string') {
+                wordDictionary[key] = value;
+            }
+        });
+    }
+} catch (error) {
+    console.warn('辞書データの読み込みに失敗しました。初期辞書を使用します。', error);
+}
 
 // 辞書モーダルを開く
 function openDictModal() {
@@ -791,21 +792,23 @@ function renderDictList() {
 
 // 2. 音声認識で取得したテキストを辞書に基づいて置き換える関数
 function applyDictionaryReplacement(text) {
-    if (!text) return text;
-    let replacedText = text;
-    
-    // 辞書に登録された全てのキー（変換前）で置換を実行
-    Object.keys(wordDictionary).forEach(key => {
-        if (key) {
-            // エスケープ処理を行って安全に正規表現化し、一括置換
-            const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(escapedKey, 'g');
-            replacedText = replacedText.replace(regex, wordDictionary[key]);
-        }
-    });
-    
-    return replacedText;
+    if (!text || !wordDictionary) return text;
+
+    // 全角・半角や文字コードの表記揺れを正規化
+    let normalizedText = text.normalize('NFC');
+
+    const entries = Object.entries(wordDictionary)
+        .filter(([key, value]) => key && typeof value === 'string')
+        .sort(([keyA], [keyB]) => keyB.length - keyA.length);
+
+    if (entries.length === 0) return normalizedText;
+
+    // 1本の正規表現を作成して一括置換（二重変換を防止）
+    const escapedKeys = entries.map(([key]) => key.normalize('NFC').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const replacements = new Map(entries.map(([key, value]) => [key.normalize('NFC'), value]));
+    const regex = new RegExp(escapedKeys.join('|'), 'gu');
+
+    return normalizedText.replace(regex, matched => replacements.get(matched) ?? matched);
 }
 
 // HTMLエスケープ関数（安全対策）
-
