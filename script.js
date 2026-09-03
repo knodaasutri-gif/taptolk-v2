@@ -1,7 +1,6 @@
 // --- 単語置換辞書（ここによくある誤字や変換したい単語を登録） ---
 const wordDictionary = {
-    "ジェミニ": "Gemini",
-    "ジェミニー": "Gemini",
+    "ジェミニ": "Gemini"
     // 必要に応じてここに追加していきます
 };
 
@@ -760,7 +759,7 @@ function deleteDictWord(key) {
 function renderDictList() {
     const listContainer = document.getElementById('dictList');
     if (!listContainer) return;
-
+    listContainer.innerHTML = ''; // ★この1行を追加するだけ！
     const keys = Object.keys(wordDictionary);
     if (keys.length === 0) {
         const emptyEl = document.createElement("div");
