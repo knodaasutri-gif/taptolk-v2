@@ -1,8 +1,31 @@
-// --- 単語置換辞書（ここによくある誤字や変換したい単語を登録） ---
-const wordDictionary = {
+// --- 単語置換辞書 ---
+const defaultDictionary = {
     "ジェミニ": "Gemini"
-    // 必要に応じてここに追加していきます
 };
+
+// 安全に辞書データを読み込む関数
+function loadDictionary() {
+    const savedData = localStorage.getItem('wordDictionary');
+    if (!savedData) {
+        return { ...defaultDictionary };
+    }
+
+    try {
+        const parsed = JSON.parse(savedData);
+        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+            return parsed;
+        } else {
+            console.warn("保存された辞書データが不正なため初期化します。");
+            return { ...defaultDictionary };
+        }
+    } catch (e) {
+        console.error("辞書データの読み込みエラー:", e);
+        return { ...defaultDictionary };
+    }
+}
+
+// 辞書データの初期化実行
+let wordDictionary = loadDictionary();
 
 const defaultCategories = [
     {
