@@ -782,7 +782,10 @@ function deleteDictWord(key) {
 function renderDictList() {
     const listContainer = document.getElementById('dictList');
     if (!listContainer) return;
-    listContainer.innerHTML = ''; // ★この1行を追加するだけ！
+
+    // 表示の初期化
+    listContainer.innerHTML = '';
+
     const keys = Object.keys(wordDictionary);
     if (keys.length === 0) {
         const emptyEl = document.createElement("div");
@@ -792,45 +795,25 @@ function renderDictList() {
         return;
     }
 
+    // 安全なDOM生成（textContentとcreateElementを使用）
+    const fragment = document.createDocumentFragment();
     keys.forEach(key => {
-        const item = document.createElement("div");
-        item.className = "dict-item";
+        const item = document.createElement('div');
+        item.className = 'dict-item';
+        item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #e2e8f0;';
 
-        const label = document.createElement("span");
-        const keyEl = document.createElement("strong");
-        keyEl.textContent = key;
-        label.append(keyEl, document.createTextNode(" ➔ "), document.createTextNode(wordDictionary[key]));
+        const wordText = document.createElement('span');
+        wordText.textContent = `${key} → ${wordDictionary[key]}`;
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "dict-delete-btn";
-        deleteBtn.type = "button";
-        deleteBtn.textContent = "削除";
-        deleteBtn.addEventListener("click", () => deleteDictWord(key));
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '削除';
+        deleteBtn.style.cssText = 'background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;';
+        deleteBtn.onclick = () => deleteDictWord(key);
 
-        item.append(label, deleteBtn);
-        listContainer.appendChild(item);
+        item.appendChild(wordText);
+        item.appendChild(deleteBtn);
+        fragment.appendChild(item);
     });
+
+    listContainer.appendChild(fragment);
 }
-
-// 2. 音声認識で取得したテキストを辞書に基づいて置き換える関数
-function applyDictionaryReplacement(text) {
-    if (!text || !wordDictionary) return text;
-
-    // 全角・半角や文字コードの表記揺れを正規化
-    let normalizedText = text.normalize('NFC');
-
-    const entries = Object.entries(wordDictionary)
-        .filter(([key, value]) => key && typeof value === 'string')
-        .sort(([keyA], [keyB]) => keyB.length - keyA.length);
-
-    if (entries.length === 0) return normalizedText;
-
-    // 1本の正規表現を作成して一括置換（二重変換を防止）
-    const escapedKeys = entries.map(([key]) => key.normalize('NFC').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    const replacements = new Map(entries.map(([key, value]) => [key.normalize('NFC'), value]));
-    const regex = new RegExp(escapedKeys.join('|'), 'gu');
-
-    return normalizedText.replace(regex, matched => replacements.get(matched) ?? matched);
-}
-
-// HTMLエスケープ関数（安全対策）
