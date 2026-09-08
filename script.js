@@ -374,6 +374,9 @@ function handleKeyPress(e) {
         speakCustomInput();
     }
 }
+// 音声認識の再試行管理用変数
+let recognitionRetryCount = 0;
+const MAX_RETRY_COUNT = 3;
 
 function initSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -382,44 +385,28 @@ function initSpeechRecognition() {
         if (micBtn) micBtn.style.display = "none";
         return;
     }
+
     recognition = new SpeechRecognition();
     recognition.lang = 'ja-JP';
     recognition.continuous = true;
     recognition.interimResults = true;
 
-    const resetListeningState = () => {
-        isListening = false;
-        const micBtn = document.getElementById("micBtn");
-        if (micBtn) {
-            micBtn.classList.remove("listening");
-            micBtn.textContent = "🎤 音声入力";
-        }
+    // 音声認識が実際に開始された時の処理
+    recognition.onstart = () => {
+        isStarting = false;
+        recognitionRetryCount = 0; // 正常起動したらリトライ回数をリセット
     };
 
-    const reportRecognitionError = (error) => {
-        const messages = {
-            "not-allowed": "マイクの使用が許可されていません。ブラウザの権限設定を確認してください。",
-            "service-not-allowed": "このブラウザでは音声認識サービスを利用できません。",
-            "network": "音声認識の通信エラーが発生しました。ネットワーク接続を確認してください。",
-            "no-speech": "音声を検出できませんでした。",
-            "audio-capture": "マイクを利用できません。接続・設定を確認してください。",
-            "aborted": "音声認識が中断されました。"
-        };
-        const message = messages[error] || `音声認識エラーが発生しました（${error || "unknown"}）。`;
-        console.error("SpeechRecognition error:", error, message);
-        showToast(message);
-    };
-
+    // 音声認識結果の受け取り（文字起こし処理）
     recognition.onresult = (event) => {
-        // 最新の確定結果だけを取得する
         const lastResultIndex = event.results.length - 1;
         const lastResult = event.results[lastResultIndex];
         let transcript = lastResult[0].transcript.trim();
+
         transcript = applyDictionaryReplacement(transcript);
 
         // 確定した結果（isFinal）かつ、直前と同じ文字でなければ追加
         if (lastResult.isFinal && transcript !== "") {
-            // タイムラインの最後の吹き出しと同じテキストなら追加しない（重複防止）
             const timeline = document.getElementById("chatTimeline");
             const lastBubble = timeline ? timeline.lastElementChild : null;
 
@@ -429,35 +416,29 @@ function initSpeechRecognition() {
         }
     };
 
-
-
-
-
-    recognition.onerror = (event) => {
-        // エラーの後に onend が発火しても再起動しないよう、先に状態を解除する。
-        if (recognitionRestartTimer !== null) {
-            clearTimeout(recognitionRestartTimer);
-            recognitionRestartTimer = null;
-        }
-        isStarting = false;
-        resetListeningState();
-        reportRecognitionError(event.error);
-    };
-
+    // 音声認識が終了した時の処理（自動再接続）
     recognition.onend = () => {
         if (!isListening) {
             resetListeningState();
             return;
         }
 
-        // onend 直後の start() は InvalidStateError になることがあるため、少し待って再開する。
+        // 起動処理中またはタイマー待機中の重複処理を回避
         if (isStarting || recognitionRestartTimer !== null) return;
 
+        // 連続再起動の回数制限チェック
+        if (recognitionRetryCount >= MAX_RETRY_COUNT) {
+            console.warn("音声認識の再試行上限に達したため停止します。");
+            showToast("音声認識が停止しました。マイクボタンを押して再開してください。");
+            resetListeningState();
+            return;
+        }
+
         isStarting = true;
+        recognitionRetryCount++;
+
         recognitionRestartTimer = setTimeout(() => {
             recognitionRestartTimer = null;
-
-            // 待機中にユーザーが停止した場合は、再開しない。
             if (!isListening) {
                 isStarting = false;
                 resetListeningState();
@@ -475,8 +456,16 @@ function initSpeechRecognition() {
             }
         }, 400);
     };
-}
 
+    // エラー発生時の処理
+    recognition.onerror = (event) => {
+        console.error("SpeechRecognition error:", event.error);
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            showToast("マイクの使用が許可されていません。");
+            resetListeningState();
+        }
+    };
+}
 function toggleSpeechRecognition() {
     if (!recognition) {
         showToast("お使いのブラウザは音声入力非対応です");
@@ -816,4 +805,20 @@ function renderDictList() {
     });
 
     listContainer.appendChild(fragment);
+}
+
+// 未定義エラー回避用の関数定義
+if (typeof applyDictionaryReplacement !== 'function') {
+    function applyDictionaryReplacement(text) {
+        return text; // 置換を行わずそのままテキストを返す
+    }
+}
+
+if (typeof resetListeningState !== 'function') {
+    function resetListeningState() {
+        if (typeof isListening !== 'undefined') isListening = false;
+        if (typeof isStarting !== 'undefined') isStarting = false;
+        if (typeof recognitionRestartTimer !== 'undefined') recognitionRestartTimer = null;
+        console.log("Listening state reset.");
+    }
 }
