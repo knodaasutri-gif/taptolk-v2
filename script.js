@@ -822,3 +822,14 @@ if (typeof resetListeningState !== 'function') {
         console.log("Listening state reset.");
     }
 }
+
+// Phase 3: モーダルのEscキー閉じ対応
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        const openModal = document.querySelector('.modal.is-active, .modal[style*="display: block"]');
+        if (openModal) {
+            openModal.style.display = 'none';
+            openModal.classList.remove('is-active');
+        }
+    }
+});

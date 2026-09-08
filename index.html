@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
     <title>TapTalk Mobile</title>
     <link rel="icon" href="favicon.png" type="image/png">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 
@@ -15,9 +17,9 @@
     <div class="app-container">
         <!-- 音量注意バナー -->
         <div class="volume-notice-banner">
-              🔊 カード読み上げのため、スマホの音量を上げてご使用ください
-          </div>
-                <!-- LINE風タイムライン表示エリア -->
+            🔊 カード読み上げのため、スマホの音量を上げてご使用ください
+        </div>
+        <!-- LINE風タイムライン表示エリア -->
         <div id="chatTimeline" class="chat-timeline">
             <div class="chat-bubble left">ここに音声やカードの文字が表示されます</div>
         </div>
@@ -28,53 +30,57 @@
             <button id="stopBtn" onclick="stopSpeech()" class="stop-btn">停止</button>
         </div>
 
-<
-        <!-- 自由入力用インプット -->
-        <div class="text-input-container" id="textInputContainer">
-            <input type="text" id="customTextInput" placeholder="伝えたい言葉を入力..." onkeypress="handleKeyPress(event)">
-            <button id="clearInputBtn" onclick="clearCustomInput()">クリア</button>
-            <button class="submit-btn" onclick="speakCustomInput()">発話</button>
-        </div>
+        < <!-- 自由入力用インプット -->
+            <div class="text-input-container" id="textInputContainer">
+                <input type="text" id="customTextInput" placeholder="伝えたい言葉を入力..." onkeypress="handleKeyPress(event)">
+                <button id="clearInputBtn" onclick="clearCustomInput()">クリア</button>
+                <button class="submit-btn" onclick="speakCustomInput()">発話</button>
+            </div>
 
-        <!-- メイン操作バー -->
-        <div class="action-bar">
-            <button class="action-btn mic-btn" id="micBtn" onclick="toggleSpeechRecognition()">🎤 音声入力</button>
-            <button class="action-btn text-btn" onclick="toggleTextInput()">✏️ 自由入力</button>
-            <button class="action-btn add-btn" onclick="openAddModal()">➕ カード作成</button>
-            <button class="action-btn manage-btn" id="manageBtn" onclick="toggleManageMode()">⚙️ 編集</button>
-            <button class="action-btn dict-btn" onclick="openDictModal()">📖 辞書</button>
-        </div>
+            <!-- メイン操作バー -->
+            <div class="action-bar">
+                <button class="action-btn mic-btn" id="micBtn" onclick="toggleSpeechRecognition()">🎤 音声入力</button>
+                <button class="action-btn text-btn" onclick="toggleTextInput()">✏️ 自由入力</button>
+                <button class="action-btn add-btn" onclick="openAddModal()">➕ カード作成</button>
+                <button class="action-btn manage-btn" id="manageBtn" onclick="toggleManageMode()">⚙️ 編集</button>
+                <button class="action-btn dict-btn" onclick="openDictModal()">📖 辞書</button>
+            </div>
 
-        <!-- カテゴリータブ -->
-        <div class="category-tabs" id="categoryTabs"></div>
+            <!-- カテゴリータブ -->
+            <div class="category-tabs" id="categoryTabs"></div>
 
-        <!-- 日時指定エリア（お休み・遅刻用） -->
-        <div class="calendar-section" id="calendarSection" style="display: none;">
-            <h3>📅 日時を選んでワンタッチ連絡</h3>
-            <div class="cal-controls">
-                <input type="date" id="leaveDateInput">
-                <div class="quick-date-btns">
-                    <button onclick="setQuickDate(0)">今日</button>
-                    <button onclick="setQuickDate(1)">明日</button>
-                    <button onclick="setQuickDate(2)">明後日</button>
+            <!-- 日時指定エリア（お休み・遅刻用） -->
+            <div class="calendar-section" id="calendarSection" style="display: none;">
+                <h3>📅 日時を選んでワンタッチ連絡</h3>
+                <div class="cal-controls">
+                    <input type="date" id="leaveDateInput">
+                    <div class="quick-date-btns">
+                        <button onclick="setQuickDate(0)">今日</button>
+                        <button onclick="setQuickDate(1)">明日</button>
+                        <button onclick="setQuickDate(2)">明後日</button>
+                    </div>
+                </div>
+                <div class="time-select-row">
+                    <label for="leaveTimeInput">⏰ 時間指定（必要な場合）</label>
+                    <input type="time" id="leaveTimeInput">
+                </div>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">タップしてカード作成＆送信:</p>
+                <div class="quick-leave-grid">
+                    <button class="leave-quick-btn" onclick="generateLeaveCard('終日お休みします', '📅', false)">📅
+                        終日お休み</button>
+                    <button class="leave-quick-btn" onclick="generateLeaveCard('遅れて出勤します', '⏱️', true)">⏱️
+                        時間指定遅刻</button>
+                    <button class="leave-quick-btn" onclick="generateLeaveCard('早退します', '🏃', true)">🏃 時間指定早退</button>
+                    <button class="leave-quick-btn" onclick="generateLeaveCard('午前休をいただきます', '🌅', false)">🌅
+                        午前休</button>
+                    <button class="leave-quick-btn" onclick="generateLeaveCard('午後休をいただきます', '🌄', false)">🌄
+                        午後休</button>
+                    <button class="leave-quick-btn" onclick="generateLeaveCard('通院のため遅れます', '🏥', true)">🏥
+                        通院（時間指定）</button>
                 </div>
             </div>
-            <div class="time-select-row">
-    <label for="leaveTimeInput">⏰ 時間指定（必要な場合）</label>
-    <input type="time" id="leaveTimeInput">
-</div>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">タップしてカード作成＆送信:</p>
-            <div class="quick-leave-grid">
-                <button class="leave-quick-btn" onclick="generateLeaveCard('終日お休みします', '📅', false)">📅 終日お休み</button>
-                <button class="leave-quick-btn" onclick="generateLeaveCard('遅れて出勤します', '⏱️', true)">⏱️ 時間指定遅刻</button>
-                <button class="leave-quick-btn" onclick="generateLeaveCard('早退します', '🏃', true)">🏃 時間指定早退</button>
-                <button class="leave-quick-btn" onclick="generateLeaveCard('午前休をいただきます', '🌅', false)">🌅 午前休</button>
-                <button class="leave-quick-btn" onclick="generateLeaveCard('午後休をいただきます', '🌄', false)">🌄 午後休</button>
-                <button class="leave-quick-btn" onclick="generateLeaveCard('通院のため遅れます', '🏥', true)">🏥 通院（時間指定）</button>
-            </div>
-        </div>
-        <!-- カードグリッド表示エリア -->
-        <div class="cards-grid" id="cardsGrid"></div>
+            <!-- カードグリッド表示エリア -->
+            <div class="cards-grid" id="cardsGrid"></div>
     </div>
 
     <!-- モーダル（カード追加画面） -->
@@ -103,7 +109,7 @@
     <div class="modal-overlay" id="dictModal" style="display: none;">
         <div class="modal">
             <div class="modal-header">単語置き換え辞書</div>
-            
+
             <div class="form-group">
                 <label>読み・誤字（変換前）</label>
                 <input type="text" id="dictKey" placeholder="例: じぇみに">
@@ -115,9 +121,9 @@
             <div class="modal-btns">
                 <button class="modal-btn save" onclick="saveDictWord()" style="width: 100%;">登録</button>
             </div>
-            
+
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #cbd5e1;">
-            
+
             <div class="form-group">
                 <label>登録済みリスト</label>
                 <div id="dictList" class="dict-list">
@@ -126,7 +132,8 @@
             </div>
 
             <div class="modal-btns">
-                <button class="modal-btn cancel" onclick="closeDictModal()" style="width: 100%; margin-top: 5px;">閉じる</button>
+                <button class="modal-btn cancel" onclick="closeDictModal()"
+                    style="width: 100%; margin-top: 5px;">閉じる</button>
             </div>
         </div>
     </div>
@@ -134,7 +141,7 @@
     <!-- トースト通知 -->
     <div class="toast-msg" id="toastMsg"></div>
     <script src="script.js"></script>
-    </div>  
-    </body>
-    </html>
+    </div>
+</body>
 
+</html>
