@@ -30,57 +30,68 @@
             <button id="stopBtn" onclick="stopSpeech()" class="stop-btn">停止</button>
         </div>
 
-        < <!-- 自由入力用インプット -->
-            <div class="text-input-container" id="textInputContainer">
-                <input type="text" id="customTextInput" placeholder="伝えたい言葉を入力..." onkeypress="handleKeyPress(event)">
-                <button id="clearInputBtn" onclick="clearCustomInput()">クリア</button>
-                <button class="submit-btn" onclick="speakCustomInput()">発話</button>
+        <!-- 自由入力用インプット -->
+        <div class="text-input-container" id="textInputContainer">
+            <input type="text" id="customTextInput" placeholder="伝えたい言葉を入力..." onkeypress="handleKeyPress(event)">
+            <button id="clearInputBtn" onclick="clearCustomInput()">クリア</button>
+            <button class="submit-btn" onclick="speakCustomInput()">発話</button>
+        </div>
+
+        <!-- メイン操作バー -->
+        <div class="action-bar">
+            <button class="action-btn mic-btn" id="micBtn" onclick="toggleSpeechRecognition()">🎤 音声入力</button>
+            <button class="action-btn text-btn" onclick="toggleTextInput()">✏️ 自由入力</button>
+            <button class="action-btn add-btn" onclick="openAddModal()">➕ カード作成</button>
+            <button class="action-btn manage-btn" id="manageBtn" onclick="toggleManageMode()">⚙️ 編集</button>
+            <button class="action-btn dict-btn" onclick="openDictModal()">📖 辞書</button>
+        </div>
+        <!-- ★★★ ここから追加してください ★★★ -->
+        <!-- 編集モード時のみ表示されるデータの保存・復元エリア -->
+        <div id="backupManagementArea" class="backup-section"
+            style="display: none; margin: 15px 0; padding: 12px; border: 1px solid #ccc; border-radius: 8px; background-color: #f9f9f9;">
+            <p style="font-weight: bold; margin-bottom: 8px; font-size: 0.9rem;">データの保存・復元（バックアップ）</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="exportDictBtn" class="btn" type="button" style="padding: 6px 12px;">データを保存</button>
+                <button id="importDictBtn" class="btn" type="button" style="padding: 6px 12px;">データを復元</button>
             </div>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;">
+        </div>
+        <!-- ★★★ ここまで追加 ★★★ -->
+        <!-- カテゴリータブ -->
+        <div class="category-tabs" id="categoryTabs"></div>
 
-            <!-- メイン操作バー -->
-            <div class="action-bar">
-                <button class="action-btn mic-btn" id="micBtn" onclick="toggleSpeechRecognition()">🎤 音声入力</button>
-                <button class="action-btn text-btn" onclick="toggleTextInput()">✏️ 自由入力</button>
-                <button class="action-btn add-btn" onclick="openAddModal()">➕ カード作成</button>
-                <button class="action-btn manage-btn" id="manageBtn" onclick="toggleManageMode()">⚙️ 編集</button>
-                <button class="action-btn dict-btn" onclick="openDictModal()">📖 辞書</button>
-            </div>
-
-            <!-- カテゴリータブ -->
-            <div class="category-tabs" id="categoryTabs"></div>
-
-            <!-- 日時指定エリア（お休み・遅刻用） -->
-            <div class="calendar-section" id="calendarSection" style="display: none;">
-                <h3>📅 日時を選んでワンタッチ連絡</h3>
-                <div class="cal-controls">
-                    <input type="date" id="leaveDateInput">
-                    <div class="quick-date-btns">
-                        <button onclick="setQuickDate(0)">今日</button>
-                        <button onclick="setQuickDate(1)">明日</button>
-                        <button onclick="setQuickDate(2)">明後日</button>
-                    </div>
-                </div>
-                <div class="time-select-row">
-                    <label for="leaveTimeInput">⏰ 時間指定（必要な場合）</label>
-                    <input type="time" id="leaveTimeInput">
-                </div>
-                <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">タップしてカード作成＆送信:</p>
-                <div class="quick-leave-grid">
-                    <button class="leave-quick-btn" onclick="generateLeaveCard('終日お休みします', '📅', false)">📅
-                        終日お休み</button>
-                    <button class="leave-quick-btn" onclick="generateLeaveCard('遅れて出勤します', '⏱️', true)">⏱️
-                        時間指定遅刻</button>
-                    <button class="leave-quick-btn" onclick="generateLeaveCard('早退します', '🏃', true)">🏃 時間指定早退</button>
-                    <button class="leave-quick-btn" onclick="generateLeaveCard('午前休をいただきます', '🌅', false)">🌅
-                        午前休</button>
-                    <button class="leave-quick-btn" onclick="generateLeaveCard('午後休をいただきます', '🌄', false)">🌄
-                        午後休</button>
-                    <button class="leave-quick-btn" onclick="generateLeaveCard('通院のため遅れます', '🏥', true)">🏥
-                        通院（時間指定）</button>
+        <!-- 日時指定エリア（お休み・遅刻用） -->
+        <div class="calendar-section" id="calendarSection" style="display: none;">
+            <h3>📅 日時を選んでワンタッチ連絡</h3>
+            <div class="cal-controls">
+                <input type="date" id="leaveDateInput">
+                <div class="quick-date-btns">
+                    <button onclick="setQuickDate(0)">今日</button>
+                    <button onclick="setQuickDate(1)">明日</button>
+                    <button onclick="setQuickDate(2)">明後日</button>
                 </div>
             </div>
-            <!-- カードグリッド表示エリア -->
-            <div class="cards-grid" id="cardsGrid"></div>
+            <div class="time-select-row">
+                <label for="leaveTimeInput">⏰ 時間指定（必要な場合）</label>
+                <input type="time" id="leaveTimeInput">
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">タップしてカード作成＆送信:</p>
+            <div class="quick-leave-grid">
+                <button class="leave-quick-btn" onclick="generateLeaveCard('終日お休みします', '📅', false)">📅
+                    終日お休み</button>
+                <button class="leave-quick-btn" onclick="generateLeaveCard('遅れて出勤します', '⏱️', true)">⏱️
+                    時間指定遅刻</button>
+                <button class="leave-quick-btn" onclick="generateLeaveCard('早退します', '🏃', true)">🏃 時間指定早退</button>
+                <button class="leave-quick-btn" onclick="generateLeaveCard('午前休をいただきます', '🌅', false)">🌅
+                    午前休</button>
+                <button class="leave-quick-btn" onclick="generateLeaveCard('午後休をいただきます', '🌄', false)">🌄
+                    午後休</button>
+                <button class="leave-quick-btn" onclick="generateLeaveCard('通院のため遅れます', '🏥', true)">🏥
+                    通院（時間指定）</button>
+            </div>
+        </div>
+        <!-- カードグリッド表示エリア -->
+        <div class="cards-grid" id="cardsGrid"></div>
     </div>
 
     <!-- モーダル（カード追加画面） -->

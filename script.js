@@ -523,13 +523,21 @@ function toggleManageMode() {
     triggerHaptic();
     isManageMode = !isManageMode;
     document.body.classList.toggle("manage-mode", isManageMode);
+
     const manageBtn = document.getElementById("manageBtn");
     if (manageBtn) {
-        manageBtn.textContent = isManageMode ? "✅ 完了" : "⚙️ 編集";
+        manageBtn.textContent = isManageMode ? "✅ 完了" : "⚙ 編集";
         manageBtn.style.background = isManageMode ? "#10b981" : "#e2e8f0";
         manageBtn.style.color = isManageMode ? "white" : "var(--text)";
     }
+
+    // ★追記部分（関数の閉じカッコ } の内側に配置します）
+    const backupArea = document.getElementById("backupManagementArea");
+    if (backupArea) {
+        backupArea.style.display = isManageMode ? "block" : "none";
+    }
 }
+
 
 function deleteCard(event, cardId) {
     if (event) {
@@ -832,4 +840,55 @@ document.addEventListener('keydown', (event) => {
             openModal.classList.remove('is-active');
         }
     }
+});
+
+// --- データの保存・復元機能 ---
+
+// 1. データの保存（エクスポート）
+document.getElementById('exportDictBtn')?.addEventListener('click', () => {
+    try {
+        const dictData = localStorage.getItem('userDictionary') || '{}';
+        const blob = new Blob([dictData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `taptalk_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert('データを保存しました。');
+    } catch (error) {
+        console.error('データの保存に失敗しました:', error);
+        alert('保存に失敗しました。');
+    }
+});
+
+// 2. データの復元（インポート）ボタン押下時
+document.getElementById('importDictBtn')?.addEventListener('click', () => {
+    document.getElementById('importFileInput')?.click();
+});
+
+// 3. ファイル選択時の復元処理
+document.getElementById('importFileInput')?.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const content = e.target.result;
+            JSON.parse(content); // 正しいJSONかチェック
+
+            localStorage.setItem('userDictionary', content);
+            alert('データを復元しました。画面を再読み込みします。');
+            location.reload();
+        } catch (error) {
+            console.error('無効なファイル形式です:', error);
+            alert('正しいデータファイルを選択してください。');
+        }
+    };
+    reader.readAsText(file);
 });
