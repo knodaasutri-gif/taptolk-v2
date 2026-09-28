@@ -845,12 +845,21 @@ document.addEventListener('keydown', (event) => {
 // --- データの保存・復元機能 ---
 
 // 1. データの保存（エクスポート）
-document.getElementById('exportDictBtn')?.addEventListener('click', () => {
+function exportData() {
     try {
-        const dictData = localStorage.getItem('userDictionary') || '{}';
-        const blob = new Blob([dictData], { type: 'application/json' });
+        // ローカルストレージからすべてのデータを取得
+        const data = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            data[key] = localStorage.getItem(key);
+        }
+
+        // JSON文字列に変換
+        const jsonString = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
 
+        // ダウンロード用リンクの作成と実行
         const a = document.createElement('a');
         a.href = url;
         a.download = `taptalk_backup_${new Date().toISOString().slice(0, 10)}.json`;
@@ -864,14 +873,62 @@ document.getElementById('exportDictBtn')?.addEventListener('click', () => {
         console.error('データの保存に失敗しました:', error);
         alert('保存に失敗しました。');
     }
-});
+}
 
 // 2. データの復元（インポート）ボタン押下時
 document.getElementById('importDictBtn')?.addEventListener('click', () => {
     document.getElementById('importFileInput')?.click();
 });
 
-// 3. ファイル選択時の復元処理
+// --- バックアップ（保存）機能 ---
+
+
+// --- バックアップ（保存・復元）機能 ---
+// 二重実行防止用のフラグ変数
+let isExporting = false;
+
+function exportData() {
+    if (isExporting) return;
+    isExporting = true;
+
+    try {
+        if (typeof triggerHaptic === 'function') triggerHaptic();
+
+        // taptalk_pixel_v1 から実データを取得
+        const rawData = localStorage.getItem('taptalk_pixel_v1');
+        let backupObj = rawData ? JSON.parse(rawData) : {};
+
+        // 辞書データと出力日時を付与
+        backupObj.dictionary = JSON.parse(localStorage.getItem('userDictionary') || '{}');
+        backupObj.exportedAt = new Date().toISOString();
+
+        // JSON ファイルのダウンロード処理
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupObj, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+
+        const today = new Date().toISOString().split('T')[0];
+        downloadAnchor.setAttribute("download", `taptalk_backup_${today}.json`);
+
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+
+        if (typeof showToast === 'function') {
+            showToast("データを保存しました");
+        } else {
+            alert("データを保存しました");
+        }
+    } catch (err) {
+        console.error("保存失敗:", err);
+        alert("保存エラー: " + err.message);
+    } finally {
+        setTimeout(() => {
+            isExporting = false;
+        }, 500);
+    }
+}
+// データを読み込み・復元（インポート）
 document.getElementById('importFileInput')?.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -879,15 +936,27 @@ document.getElementById('importFileInput')?.addEventListener('change', (event) =
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
-            const content = e.target.result;
-            JSON.parse(content); // 正しいJSONかチェック
+            const importedData = JSON.parse(e.target.result);
 
-            localStorage.setItem('userDictionary', content);
-            alert('データを復元しました。画面を再読み込みします。');
+            // 新フォーマット（cardsが存在する）場合
+            if (importedData.cards) {
+                localStorage.setItem('taptalk_pixel_v1', JSON.stringify(importedData.cards));
+                if (importedData.dictionary) {
+                    localStorage.setItem('userDictionary', JSON.stringify(importedData.dictionary));
+                }
+            } else if (Array.isArray(importedData)) {
+                // 配列形式（カードデータのみの旧バックアップ）の場合
+                localStorage.setItem('taptalk_pixel_v1', JSON.stringify(importedData));
+            } else {
+                // 辞書データ単体の場合
+                localStorage.setItem('userDictionary', JSON.stringify(importedData));
+            }
+
+            alert("データを復元しました。画面を再読み込みします。");
             location.reload();
-        } catch (error) {
-            console.error('無効なファイル形式です:', error);
-            alert('正しいデータファイルを選択してください。');
+        } catch (err) {
+            console.error("無効なファイル形式です:", err);
+            alert("正しいデータファイルを選択してください。");
         }
     };
     reader.readAsText(file);

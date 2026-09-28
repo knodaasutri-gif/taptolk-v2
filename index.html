@@ -51,12 +51,15 @@
             style="display: none; margin: 15px 0; padding: 12px; border: 1px solid #ccc; border-radius: 8px; background-color: #f9f9f9;">
             <p style="font-weight: bold; margin-bottom: 8px; font-size: 0.9rem;">データの保存・復元（バックアップ）</p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="exportDictBtn" class="btn" type="button" style="padding: 6px 12px;">データを保存</button>
-                <button id="importDictBtn" class="btn" type="button" style="padding: 6px 12px;">データを復元</button>
+                <button id="exportDictBtn" class="btn" type="button" style="padding: 6px 12px;"
+                    onclick="exportData()">データを保存</button>
+                <button id="importDictBtn" class="btn" type="button" style="padding: 6px 12px;"
+                    onclick="document.getElementById('importFileInput').click()">データを復元</button>
             </div>
             <input type="file" id="importFileInput" accept=".json" style="display: none;">
         </div>
         <!-- ★★★ ここまで追加 ★★★ -->
+
         <!-- カテゴリータブ -->
         <div class="category-tabs" id="categoryTabs"></div>
 
@@ -151,8 +154,9 @@
 
     <!-- トースト通知 -->
     <div class="toast-msg" id="toastMsg"></div>
-    <script src="script.js"></script>
     </div>
+
+    <script src="script.js?v=2"></script>
 </body>
 
 </html>
